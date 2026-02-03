@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SoundTrackPlayer.View.SettingsContentView"
+             xmlns:vm="clr-namespace:SoundTrackPlayer.ViewModel">
+    <ContentView.Resources>
+        <vm:SettingsViewModel x:Key="SettingsViewModel" />
+    </ContentView.Resources>
+    <ContentView.BindingContext>
+        <StaticResource Key="SettingsViewModel"></StaticResource>
+    </ContentView.BindingContext>
+    <ScrollView>
+        <VerticalStackLayout>
+            <!--コンテンツディレクトリ-->
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Label Text="コンテンツディレクトリ" Grid.Row="0" TextDecorations="Underline" FontAttributes="Bold" />
+                </Grid>
+                <Grid Grid.Row="1" Padding="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="200" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Margin="5">このプレイヤーがコンテンツを探索する対象ディレクトリを登録および解除できます。現在のところプレイリストの探索にのみ使用されます。</Label>
+                    <Border Grid.Row="1" Margin="5">
+                        <CollectionView SelectionChangedCommand="{Binding Path=ContentDirectorySelectedStringsChangedCommand}" ItemsSource="{Binding Path=ContentDirectories}" SelectionMode="Multiple" SelectedItems="{Binding Path=ContentDirectorySelectedStrings, Mode=TwoWay}" >
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Label Text="{Binding}" Margin="15,10,10,10" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Border>
+                    <Grid Grid.Row="2" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="パス:" Grid.Column="0" VerticalOptions="Center" Margin="0,0,5,0"></Label>
+                            <Entry Grid.Column="1" Text="{Binding Path=ContentDirectoryTextBoxString, Mode=TwoWay}" Margin="2" />
+                        </Grid>
+                        <Button Grid.Column="1" Text="参照" Command="{Binding Path=ContentDirectoryOpenButtonClickCommand}" Margin="2" />
+                        <Button Grid.Column="2" Text="登録" Command="{Binding Path=ContentDirectoryAddButtonClickCommand}"  Margin="2" />
+                        <Button Grid.Column="3" Text="解除" Command="{Binding Path=ContentDirectoryDeleteButtonClickCommand}" Margin="2" />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <!--このアプリケーションについて-->
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Label Text="このアプリケーションについて" Grid.Row="0" TextDecorations="Underline" FontAttributes="Bold" />
+                </Grid>
+                <Grid Grid.Row="1" Padding="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Margin="5">SoundTrackPlayer(仮称) Version 1.0.0</Label>
+                </Grid>
+            </Grid>
+            <!--使用ライブラリ等のライセンスについて-->
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Label Text="使用ライブラリ等のライセンスについて" Grid.Row="0" TextDecorations="Underline" FontAttributes="Bold" />
+                </Grid>
+                <Grid Grid.Row="1" Padding="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <WebView Grid.Row="0" Margin="5" HeightRequest="300" Source="3rd-party.html"/>
+                </Grid>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

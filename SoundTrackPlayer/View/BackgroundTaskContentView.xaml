@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SoundTrackPlayer.ViewModel"
+             xmlns:model="clr-namespace:SoundTrackPlayer.Model"
+             x:Class="SoundTrackPlayer.View.BackgroundTaskContentView"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+    <ContentView.Resources>
+        <vm:BackgroundTaskViewModel x:Key="BackgroundTaskViewModel" />
+        <DataTemplate x:Key="TaskDataTemplate">
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Grid Padding="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="150" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding Path=Image}" WidthRequest="30" HeightRequest="30" Grid.Column="0" />
+                        <Label Text="{Binding Path=Progress, StringFormat='{0:P0}'}" Grid.Column="1" VerticalOptions="Center"/>
+                        <Label Text="{Binding Path=Name}" Grid.Column="2" VerticalOptions="Center" LineBreakMode="TailTruncation"/>
+                        <Label Text="{Binding Path=TaskStartedDateTime}" Grid.Column="3" VerticalOptions="Center"/>
+                        <Label Text="{Binding Path=TaskCompletedDateTime}" Grid.Column="4" VerticalOptions="Center"/>
+                    </Grid>
+                </toolkit:Expander.Header>
+                <VerticalStackLayout Margin="15,0,15,10">
+                    <Label Text="メッセージ:" Margin="0,0,0,5" />
+                    <Border StrokeThickness="1" Stroke="Gray">
+                        <Editor IsReadOnly="True" Text="{Binding Path=Result}" HeightRequest="200"/>
+                    </Border>
+                </VerticalStackLayout>
+            </toolkit:Expander>
+        </DataTemplate>
+    </ContentView.Resources>
+    <ContentView.BindingContext>
+        <StaticResource Key="BackgroundTaskViewModel"></StaticResource>
+    </ContentView.BindingContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Padding="5" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="150" />
+            </Grid.ColumnDefinitions>
+            <Label Text="状態" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center"/>
+            <Label Text="進捗率" Grid.Column="1" VerticalOptions="Center"/>
+            <Label Text="タスク名" Grid.Column="2" VerticalOptions="Center" LineBreakMode="TailTruncation"/>
+            <Label Text="開始日時" Grid.Column="3" VerticalOptions="Center"/>
+            <Label Text="完了日時" Grid.Column="4" VerticalOptions="Center"/>
+        </Grid>
+        <CollectionView SelectionMode="Single" ItemsSource="{Binding Path=BackgroundTaskItemViewModels}" ItemTemplate="{StaticResource TaskDataTemplate}" Grid.Row="1">
+        </CollectionView>
+    </Grid>
+</ContentView>
+
+    

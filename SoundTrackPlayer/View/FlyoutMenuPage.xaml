@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SoundTrackPlayer.View.FlyoutMenuPage"
+             xmlns:view="clr-namespace:SoundTrackPlayer.View"
+             xmlns:model="clr-namespace:SoundTrackPlayer.Model"
+             xmlns:parent="clr-namespace:SoundTrackPlayer"
+             xmlns:vm="clr-namespace:SoundTrackPlayer.ViewModel"
+             Title="FlyoutMenuPage">
+    <ContentPage.Resources>
+        <vm:FlyoutMenuPageViewModel x:Key="FlyoutMenuPageViewModel" />
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <StaticResource Key="FlyoutMenuPageViewModel"></StaticResource>
+    </ContentPage.BindingContext>
+    <VerticalStackLayout>
+        <CollectionView x:Name="MenuItemsCollectionView"
+                        x:FieldModifier="Public"
+                    SelectionMode="Single" Margin="0,0,0,5" ItemsSource="{Binding MenuItems}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="15,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding Path=IconSource}" />
+                        <Label Text="{Binding Title}" Grid.Column="1" Margin="15,0" FontAttributes="Bold" VerticalOptions="Center" FontSize="12"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <BoxView HeightRequest="1" Color="Gray"></BoxView>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Text="プレイリスト" Margin="10,10" VerticalOptions="Center" />
+            <ImageButton Grid.Column="1" Margin="5,5" Source="{AppThemeBinding Light=update_light.png, Dark=update_dark.png}" Command="{Binding Path=PlayListUpdateCommand}" WidthRequest="30" HeightRequest="30" Aspect="Center" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
+        </Grid>
+        <CollectionView x:Name="PlayListCollectionView"
+                        x:FieldModifier="Public"
+                        SelectionMode="Single">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="5,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding Name}" Grid.Column="0" Margin="15,0" FontAttributes="Bold" VerticalOptions="Center" FontSize="12"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>
