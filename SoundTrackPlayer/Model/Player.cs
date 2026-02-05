@@ -454,10 +454,11 @@ namespace SoundTrackPlayer.Model
                 if (_playback_device is not null && _playback_device.Info is not null)
                 {
                     var device_id = _playback_device.Info.Value.Id;
+                    var device_name = _playback_device.Info.Value.Name;
                     try
                     {
                         var device_info = _engine.PlaybackDevices.First((x) => x.Id == device_id);
-                        if (!device_info.IsDefault)
+                        if (!device_info.IsDefault || device_info.Name != device_name)
                         {
                             SwitchToDefaultDevice();
                         }
