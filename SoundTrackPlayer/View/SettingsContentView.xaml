@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SoundTrackPlayer.View.SettingsContentView"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:SoundTrackPlayer.ViewModel">
     <ContentView.Resources>
         <vm:SettingsViewModel x:Key="SettingsViewModel" />
@@ -59,6 +60,99 @@
                         <Button Grid.Column="1" Text="参照" Command="{Binding Path=ContentDirectoryOpenButtonClickCommand}" Margin="2" />
                         <Button Grid.Column="2" Text="登録" Command="{Binding Path=ContentDirectoryAddButtonClickCommand}"  Margin="2" />
                         <Button Grid.Column="3" Text="解除" Command="{Binding Path=ContentDirectoryDeleteButtonClickCommand}" Margin="2" />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <!--ループ開始位置検出-->
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Label Text="ループ開始位置検出" Grid.Row="0" TextDecorations="Underline" FontAttributes="Bold" />
+                </Grid>
+                <Grid Grid.Row="1" Padding="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Margin="5">ループ開始位置検出に関する値を設定できます。</Label>
+                    <Border Margin="10,0,10,0" StrokeThickness="1" Stroke="Gray" Grid.Row="2">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Margin="5" FontAttributes="Bold" >ループ開始位置検出について</Label>
+                            <Label Margin="5" Grid.Row="1">
+                                <![CDATA[
+ループ開始位置検出では、予め指定したループ終了位置の音声波形(比較元)と、楽曲の一部を切り出した音声波形(比較先)にどの程度差分があるかを計算します。切り出し位置を先頭から末尾に向けて少しずつずらしていくことでそれぞれの位置での差分量を算出し、最終的に差分量が一番少ない位置をトラックのループ開始位置として設定します。
+
+通常、ループ開始位置は楽曲の先頭付近にあるため比較先切り出し対象区間は、楽曲の先頭から「比較先切り出し対象区間の長さ(ループ開始位置ヒントなしの場合)」までの区間としています。ただし予めループ開始位置が指定されていた場合は、ループ開始位置のヒントが指定されているとみなし、その位置を中心とした区間を比較先切り出し対象区間とします。この区間の長さには「比較先切り出し対象区間の長さ(ループ開始位置ヒントなしの場合)」で指定された値が設定されます。
+                        ]]>
+                            </Label>
+                        </Grid>
+                    </Border>
+                    <Grid Grid.Row="1" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="120" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Margin="2" VerticalOptions="Center" Text="比較元の長さ [秒]" />
+                        <Entry Grid.Row="0" Grid.Column="1" Text="{Binding FindLoopPointCompareDurationString, Mode=TwoWay}" Margin="2"  VerticalOptions="Center">
+                            <Entry.Behaviors>
+                                <toolkit:EventToCommandBehavior 
+                                                            EventName="Unfocused" 
+                                                            Command="{Binding Path=FindLoopPointCompareDurationEntryUnfocusedCommand}" 
+                                                            BindingContext="{StaticResource SettingsViewModel}">
+                                </toolkit:EventToCommandBehavior>
+                                <toolkit:EventToCommandBehavior 
+                                                            EventName="Completed" 
+                                                            Command="{Binding Path=FindLoopPointCompareDurationEntryUnfocusedCommand}" 
+                                                            BindingContext="{StaticResource SettingsViewModel}">
+                                </toolkit:EventToCommandBehavior>
+                            </Entry.Behaviors>
+                        </Entry>
+                        <Label Grid.Row="1" Grid.Column="0" Margin="2" VerticalOptions="Center" Text="比較先切り出し対象区間の長さ(ループ開始位置ヒントなしの場合) [秒]" />
+                        <Entry Grid.Row="1" Grid.Column="1" Text="{Binding FindLoopPointTargetDuration_WithoutLoopBeginString, Mode=TwoWay}" Margin="2"  VerticalOptions="Center">
+                            <Entry.Behaviors>
+                                <toolkit:EventToCommandBehavior 
+                                                            EventName="Unfocused" 
+                                                            Command="{Binding Path=FindLoopPointTargetDuration_WithoutLoopBeginEntryUnfocusedCommand}" 
+                                                            BindingContext="{StaticResource SettingsViewModel}">
+                                </toolkit:EventToCommandBehavior>
+                                <toolkit:EventToCommandBehavior 
+                                                            EventName="Completed" 
+                                                            Command="{Binding Path=FindLoopPointTargetDuration_WithoutLoopBeginEntryUnfocusedCommand}" 
+                                                            BindingContext="{StaticResource SettingsViewModel}">
+                                </toolkit:EventToCommandBehavior>
+                            </Entry.Behaviors>
+                        </Entry>
+                        <Label Grid.Row="2" Grid.Column="0" Margin="2" VerticalOptions="Center" Text="比較先切り出し対象区間の長さ(ループ開始位置ヒントありの場合) [秒]" />
+                        <Entry Grid.Row="2" Grid.Column="1" Text="{Binding FindLoopPointTargetDuration_WithLoopBeginString, Mode=TwoWay}" Margin="2"  VerticalOptions="Center">
+                            <Entry.Behaviors>
+                                <toolkit:EventToCommandBehavior 
+                                                            EventName="Unfocused" 
+                                                            Command="{Binding Path=FindLoopPointTargetDuration_WithLoopBeginEntryUnfocusedCommand}" 
+                                                            BindingContext="{StaticResource SettingsViewModel}">
+                                </toolkit:EventToCommandBehavior>
+                                <toolkit:EventToCommandBehavior 
+                                                            EventName="Completed" 
+                                                            Command="{Binding Path=FindLoopPointTargetDuration_WithLoopBeginEntryUnfocusedCommand}" 
+                                                            BindingContext="{StaticResource SettingsViewModel}">
+                                </toolkit:EventToCommandBehavior>
+                            </Entry.Behaviors>
+                        </Entry>
                     </Grid>
                 </Grid>
             </Grid>

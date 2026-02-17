@@ -1,13 +1,5 @@
-using SoundFlow.Structs;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-//using Windows.ApplicationModel.Background;
 
 namespace SoundTrackPlayer.Model
 {
@@ -37,6 +29,16 @@ namespace SoundTrackPlayer.Model
                         });
                         return;
                     }
+                    if (t.Info.Length is null)
+                    {
+                        ((IProgress<BackgroundTaskProgress>)progress_reporter).Report(new BackgroundTaskProgress()
+                        {
+                            State = BackgroundTaskState.Failed,
+                            Result = "トラックの長さが不明です。",
+                            Progress = 1.0
+                        });
+                        return;
+                    }
 
                     var inner_progress_reporter = new Progress<FindLoopBeginProgress>();
                     inner_progress_reporter.ProgressChanged += (s, e) =>
@@ -51,14 +53,22 @@ namespace SoundTrackPlayer.Model
                         });
                     };
 
-                    var result = LoopPoint.FindLoopBeginTimeSpan(t, t.Config.LoopEnd.Value, inner_progress_reporter, 44100 * 3);
+                    //var result = LoopPoint.FindLoopBeginTimeSpan(t, t.Config.LoopEnd.Value, inner_progress_reporter, 44100 * 3);
+                    var compare_duration = Config.FindLoopPointCompareDuration;
+                    var target_begin = t.Config.LoopBegin == null ? TimeSpan.Zero : t.Config.LoopBegin.Value - Config.FindLoopPointTargetDuration_WithLoopBegin / 2;
+                    var target_end = t.Config.LoopBegin == null ? Config.FindLoopPointTargetDuration_WithoutLoopBegin : t.Config.LoopBegin.Value + Config.FindLoopPointTargetDuration_WithLoopBegin * 1.5;
+                    var result = LoopPoint.FindLoopBeginSample(t, target_begin, target_end, t.Config.LoopEnd.Value, compare_duration, inner_progress_reporter);
+
                     if (result.Any())
                     {
                         t.Config.LoopBegin = result.First();
+
+                        var str = string.Join("\r\n", result.Select((e) => { return e.ToString(@"hh\:mm\:ss\.ffffff"); }));
+
                         ((IProgress<BackgroundTaskProgress>)progress_reporter).Report(new BackgroundTaskProgress()
                         {
                             State = BackgroundTaskState.Succeeded,
-                            Result = "ループ開始点: " + t.Config.LoopBegin.Value.ToString(@"hh\:mm\:ss\.ffffff"),
+                            Result = "ループ開始点: " + t.Config.LoopBegin.Value.ToString(@"hh\:mm\:ss\.ffffff") + "\r\n<類似度上位10点>\r\n" + str,
                             Progress = 1.0
                         });
                     }
@@ -79,8 +89,9 @@ namespace SoundTrackPlayer.Model
             return bg_task;
         }
 
-        public static IEnumerable<TimeSpan> FindLoopBeginTimeSpan(Track t, TimeSpan loop_end, IProgress<FindLoopBeginProgress> progress, int compare_samples = 44100, float threshold = 100)
+        public static IEnumerable<TimeSpan> FindLoopBeginTimeSpan(Track t, TimeSpan loop_end, IProgress<FindLoopBeginProgress> progress, int compare_samples = 44100, TimeSpan? loop_begin = null)
         {
+
             SoundFlow.Abstracts.AudioEngine engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
             SoundFlow.Structs.AudioFormat audio_format = SoundFlow.Structs.AudioFormat.Cd;
 
@@ -90,13 +101,20 @@ namespace SoundTrackPlayer.Model
             if (stream is null) throw new TrackDataLoadException();
 
             SoundFlow.Providers.StreamDataProvider src = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, stream);
-            if (src.FormatInfo is null) throw new TrackDataLoadException();
+            if (src.FormatInfo is null) return [];
 
-            int loop_end_sample = (int)(loop_end.TotalSeconds * src.FormatInfo.SampleRate);
+            var whole_data = ReadAllSamples(src);
+            var mixed_data = MixChannel(whole_data, src.FormatInfo.ChannelCount);
+            whole_data = null;
 
-            var result = FindLoopBeginSample(src, loop_end_sample, progress, compare_samples, threshold).Select(
-                (e) => { 
-                    return TimeSpan.FromSeconds((double)e / src.FormatInfo.SampleRate); 
+            TimeSpan target_begin = TimeSpan.Zero;
+            TimeSpan target_end = src.FormatInfo.Duration / 4;
+            TimeSpan compare_duration = TimeSpan.FromSeconds((double)compare_samples / src.FormatInfo.SampleRate);
+
+            var result = FindLoopBeginSample(mixed_data, src.FormatInfo.SampleRate, target_begin, target_end, loop_end, compare_duration, progress).Select(
+                (e) =>
+                {
+                    return TimeSpan.FromSeconds((double)e / src.FormatInfo.SampleRate);
                 });
 
             src.Dispose();
@@ -105,12 +123,12 @@ namespace SoundTrackPlayer.Model
             return result;
         }
 
-        public static IEnumerable<int> FindLoopBeginSample(SoundFlow.Interfaces.ISoundDataProvider src, int loop_end_sample, IProgress<FindLoopBeginProgress> progress, int compare_samples = 44100, float threshold = 100)
+        private static float[] ReadAllSamples(SoundFlow.Providers.StreamDataProvider src)
         {
-            if (src.FormatInfo is null) return [];
+            if (src.FormatInfo is null) throw new TrackDataLoadException();
 
             int whole_samples = src.Length;
-            if (whole_samples == 0 || whole_samples == -1 || !src.CanSeek) return [];
+            if (whole_samples == 0 || whole_samples == -1 || !src.CanSeek) throw new TrackDataLoadException();
 
             src.Seek(0);
 
@@ -128,60 +146,105 @@ namespace SoundTrackPlayer.Model
                 read += ret;
                 data_span = data_span[read..];
             }
+            return whole_data;
+        }
 
-            var mixed_data = SoundFlow.Utils.ChannelMixer.Mix(whole_data, src.FormatInfo.ChannelCount, 1);
-            if (loop_end_sample + compare_samples > mixed_data.Length) return [];
+        private static float[] MixChannel(float[] whole_data, int channel)
+        {
+            return SoundFlow.Utils.ChannelMixer.Mix(whole_data, channel, 1);
+        }
 
-            var e_min = float.PositiveInfinity;
-            int sample_no_e_min = -1;
-            int compares_total = mixed_data.Length / 4 - compare_samples;
-            System.Diagnostics.Debug.Write(String.Format("Total compares: {0}", compares_total));
-            progress.Report(new FindLoopBeginProgress()
+        public static IEnumerable<TimeSpan> FindLoopBeginSample(Track t, TimeSpan target_begin, TimeSpan target_end, TimeSpan loop_end, TimeSpan compare_duration, IProgress<FindLoopBeginProgress>? progress = null)
+        {
+            if (t.Source is null) throw new TrackDataLoadException();
+            var stream = t.Source.Open();
+            if (stream is null) throw new TrackDataLoadException();
+
+            SoundFlow.Abstracts.AudioEngine? engine = null;
+            SoundFlow.Structs.AudioFormat audio_format = SoundFlow.Structs.AudioFormat.Cd;
+            SoundFlow.Providers.StreamDataProvider? src = null;
+
+            float[]? whole_data;
+            float[]? mixed_data;
+
+            try
+            {
+                engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
+                src = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, stream);
+                if (src.FormatInfo is null) return [];
+
+                whole_data = ReadAllSamples(src);
+                mixed_data = MixChannel(whole_data, src.FormatInfo.ChannelCount);
+                whole_data = null;
+
+                var result = FindLoopBeginSample(mixed_data, src.FormatInfo.SampleRate, target_begin, target_end, loop_end, compare_duration, progress).Select(
+                    (e) =>
+                    {
+                        return TimeSpan.FromSeconds((double)e / src.FormatInfo.SampleRate);
+                    });
+                return result;
+            }
+            finally
+            {
+                whole_data = null;
+                mixed_data = null;
+                src?.Dispose();
+                stream.Close();
+                engine?.Dispose();
+            }
+        }
+
+        public static IEnumerable<int> FindLoopBeginSample(float[] mixed_data, int sample_rate, TimeSpan target_begin, TimeSpan target_end, TimeSpan loop_end, TimeSpan compare_duration, IProgress<FindLoopBeginProgress>? progress = null)
+        {
+            if (sample_rate <= 0) throw new Exception();
+
+            int target_begin_sample = (int)(target_begin.TotalSeconds * sample_rate);
+            int target_end_sample = (int)(target_end.TotalSeconds * sample_rate);
+            int loop_end_sample = (int)(loop_end.TotalSeconds * sample_rate);
+            int compare_samples = (int)(compare_duration.TotalSeconds * sample_rate);
+
+            return FindLoopBeginSample(mixed_data, target_begin_sample, target_end_sample, loop_end_sample, compare_samples, progress);
+        }
+
+        private static IEnumerable<int> FindLoopBeginSample(float[] mixed_data, int target_begin_sample, int target_end_sample, int loop_end_sample, int compare_samples = 44100, IProgress<FindLoopBeginProgress>? progress = null)
+        {
+            if (mixed_data.Length == 0) throw new Exception();
+
+            if (target_begin_sample < 0) target_begin_sample = 0;
+            if (target_begin_sample >= mixed_data.Length) throw new Exception();
+            if (target_end_sample < 0) throw new Exception();
+            if (target_end_sample > mixed_data.Length) target_end_sample = mixed_data.Length - 1;
+            if (compare_samples <= 0) throw new Exception();
+            if (compare_samples > mixed_data.Length) throw new Exception();
+            if (loop_end_sample + compare_samples >= mixed_data.Length) loop_end_sample = mixed_data.Length - compare_samples;
+            if (loop_end_sample < 0) throw new Exception();
+
+            if (target_begin_sample >= target_end_sample) throw new Exception();
+
+            int compares_total = target_end_sample - target_begin_sample - compare_samples;
+            if (compares_total <= 0) throw new Exception();
+
+            System.Diagnostics.Debug.WriteLine(String.Format("Total compares: {0}", compares_total));
+            progress?.Report(new FindLoopBeginProgress()
             {
                 Current = 0,
                 Total = compares_total
             });
 
-            //for (int i = 0; i < compares_total; ++i)
-            //{
-            //    if (i % 1000 == 0)
-            //    {
-            //        System.Diagnostics.Debug.Write(String.Format("{0} ", i, mixed_data.Length / 4 - compare_samples));
-            //    }
-            //    var target = new Span<float>(mixed_data, i, compare_samples);
-            //    var e = 0.0f;
-            //    for (int k = 0; k < compare_samples; ++k)
-            //    {
-            //        e += Math.Abs(target[k] - samples_to_compare[k]);
-            //        if (e / compare_samples > 0.5)
-            //        {
-            //            e = float.PositiveInfinity;
-            //            break;
-            //        }
-            //    }
-            //    //System.Diagnostics.Debug.WriteLine(String.Format("e = {0}", e));
-            //    if (e < e_min)
-            //    {
-            //        e_min = e;
-            //        sample_no_e_min = i;
-            //        System.Diagnostics.Debug.WriteLine("");
-            //        System.Diagnostics.Debug.WriteLine(String.Format("e_min changed to {0} at sample {1}", e_min, sample_no_e_min));
-            //    }
-            //}
             var e_values = new ConcurrentBag<(int, float)>();
             var parallel_options = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = Environment.ProcessorCount / 2
             };
 
-            var r = Parallel.For(0, compares_total, parallel_options, (i, s) =>
+            var r = Parallel.For(target_begin_sample, target_begin_sample + compares_total, parallel_options, (i, s) =>
             {
                 var samples_to_compare = new ReadOnlySpan<float>(mixed_data, loop_end_sample + 1, compare_samples);
 
-                if (i % 100000 == 0)
+                if (i % 10000 == 0)
                 {
-                    System.Diagnostics.Debug.Write(String.Format("{0} ", i, mixed_data.Length / 4 - compare_samples));
-                    progress.Report(new FindLoopBeginProgress()
+                    System.Diagnostics.Debug.Write(String.Format("{0} ", i));
+                    progress?.Report(new FindLoopBeginProgress()
                     {
                         Current = e_values.Count,
                         Total = compares_total
@@ -193,7 +256,6 @@ namespace SoundTrackPlayer.Model
                 if (Vector.IsHardwareAccelerated)
                 {
                     int remaining = compare_samples % Vector<float>.Count;
-                    float[] result = new float[compare_samples];
 
                     for (int k = 0; k < compare_samples - remaining; k += Vector<float>.Count)
                     {
@@ -229,29 +291,21 @@ namespace SoundTrackPlayer.Model
 
                 e_values.Add((i, e));
             });
-            progress.Report(new FindLoopBeginProgress()
+            progress?.Report(new FindLoopBeginProgress()
             {
                 Current = e_values.Count,
                 Total = compares_total
             });
 
-            //var e_max = 0.0f;
-            //var max_pair = e_values.MaxBy(e => e.Item2);
-            //e_max = max_pair.Item2;
-            //var sample_no_e_max = max_pair.Item1;
-            //System.Diagnostics.Debug.WriteLine("");
-            //System.Diagnostics.Debug.WriteLine(String.Format("e_max = {0} at sample {1}", e_max, sample_no_e_max));
-
-            //return [sample_no_e_max];
-
             var min_pair = e_values.MinBy(e => e.Item2);
+            var sorted_pair = e_values.OrderBy(e => e.Item2).Take(10);
 
-            e_min = min_pair.Item2;
-            sample_no_e_min = min_pair.Item1;
-            System.Diagnostics.Debug.WriteLine("");
-            System.Diagnostics.Debug.WriteLine(String.Format("e_min = {0} at sample {1}", e_min, sample_no_e_min));
+            foreach(var e in sorted_pair)
+            {
+                System.Diagnostics.Debug.WriteLine(String.Format("e = {0} at sample {1}", e.Item2, e.Item1));
+            }
 
-            return [sample_no_e_min];
+            return sorted_pair.Select(e => e.Item1);
         }
 
     }

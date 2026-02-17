@@ -50,6 +50,33 @@ namespace SoundTrackPlayer.ViewModel
             {
                 ContentDirectoryDeleteButtonClickCommand.ChangeCanExecute();
             });
+
+            FindLoopPointCompareDurationEntryUnfocusedCommand = new Command(async () =>
+            {
+                if (double.TryParse(_find_loop_point_compare_duration_string, out double result))
+                {
+                    Config.FindLoopPointCompareDuration = TimeSpan.FromSeconds(result);
+                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FindLoopPointCompareDurationString)));
+            });
+
+            FindLoopPointTargetDuration_WithoutLoopBeginEntryUnfocusedCommand = new Command(async () =>
+            {
+                if (double.TryParse(_find_loop_point_target_duration_without_loop_begin_string, out double result))
+                {
+                    Config.FindLoopPointTargetDuration_WithoutLoopBegin = TimeSpan.FromSeconds(result);
+                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FindLoopPointTargetDuration_WithoutLoopBeginString)));
+            });
+
+            FindLoopPointTargetDuration_WithLoopBeginEntryUnfocusedCommand = new Command(async () =>
+            {
+                if (double.TryParse(_find_loop_point_target_duration_with_loop_begin_string, out double result))
+                {
+                    Config.FindLoopPointTargetDuration_WithLoopBegin = TimeSpan.FromSeconds(result);
+                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FindLoopPointTargetDuration_WithLoopBeginString)));
+            });
         }
 
         private void _content_directories_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -88,10 +115,54 @@ namespace SoundTrackPlayer.ViewModel
         }
         private System.Collections.Generic.IList<object>? _content_directory_selected_strings = null;
 
+        public string FindLoopPointCompareDurationString
+        {
+            get
+            {
+                return Config.FindLoopPointCompareDuration.TotalSeconds.ToString();
+            }
+            set
+            {
+                _find_loop_point_compare_duration_string = value;
+            }
+        }
+        private string _find_loop_point_compare_duration_string = Config.FindLoopPointCompareDuration.TotalSeconds.ToString();
+
+
+        public string FindLoopPointTargetDuration_WithoutLoopBeginString
+        {
+            get
+            {
+                return Config.FindLoopPointTargetDuration_WithoutLoopBegin.TotalSeconds.ToString();
+            }
+            set
+            {
+                _find_loop_point_target_duration_without_loop_begin_string = value;
+            }
+        }
+        private string _find_loop_point_target_duration_without_loop_begin_string = Config.FindLoopPointTargetDuration_WithoutLoopBegin.TotalSeconds.ToString();
+
+        public string FindLoopPointTargetDuration_WithLoopBeginString
+        {
+            get
+            {
+                return Config.FindLoopPointTargetDuration_WithLoopBegin.TotalSeconds.ToString();
+            }
+            set
+            {
+                _find_loop_point_target_duration_with_loop_begin_string = value;
+            }
+        }
+        private string _find_loop_point_target_duration_with_loop_begin_string = Config.FindLoopPointTargetDuration_WithLoopBegin.TotalSeconds.ToString();
+
         public Command ContentDirectoryOpenButtonClickCommand { get; set; }
         public Command ContentDirectoryAddButtonClickCommand { get; set; }
         public Command ContentDirectoryDeleteButtonClickCommand { get; set; }
-
+        
         public Command ContentDirectorySelectedStringsChangedCommand { get; set; }
+
+        public Command FindLoopPointCompareDurationEntryUnfocusedCommand { get; set; }
+        public Command FindLoopPointTargetDuration_WithoutLoopBeginEntryUnfocusedCommand { get; set; }
+        public Command FindLoopPointTargetDuration_WithLoopBeginEntryUnfocusedCommand { get; set; }
     }
 }

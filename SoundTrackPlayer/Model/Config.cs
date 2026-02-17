@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,6 +58,54 @@ namespace SoundTrackPlayer.Model
             {
                 var str = String.Join("\r\n", value);
                 Preferences.Default.Set("ContentDirectories", str);
+            }
+        }
+
+        public static TimeSpan FindLoopPointCompareDuration
+        {
+            get
+            {
+                if (TimeSpan.TryParse(Preferences.Default.Get("FindLoopPointCompareDuration", "00:00:03"), out TimeSpan result))
+                {
+                    return result;
+                }
+                return TimeSpan.FromSeconds(3);
+            }
+            set
+            {
+                Preferences.Default.Set("FindLoopPointCompareDuration", value.ToString());
+            }
+        }
+
+        public static TimeSpan FindLoopPointTargetDuration_WithoutLoopBegin
+        {
+            get
+            {
+                if (TimeSpan.TryParse(Preferences.Default.Get("FindLoopPointTargetDuration_WithoutLoopBegin", "00:00:30"), out TimeSpan result))
+                {
+                    return result;
+                }
+                return TimeSpan.FromSeconds(30);
+            }
+            set
+            {
+                Preferences.Default.Set("FindLoopPointTargetDuration_WithoutLoopBegin", value.ToString());
+            }
+        }
+
+        public static TimeSpan FindLoopPointTargetDuration_WithLoopBegin
+        {
+            get
+            {
+                if (TimeSpan.TryParse(Preferences.Default.Get("FindLoopPointTargetDuration_WithLoopBegin", "00:00:06"), out TimeSpan result))
+                {
+                    return result;
+                }
+                return TimeSpan.FromSeconds(6);
+            }
+            set
+            {
+                Preferences.Default.Set("FindLoopPointTargetDuration_WithLoopBegin", value.ToString());
             }
         }
     }
