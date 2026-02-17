@@ -62,6 +62,7 @@ namespace SoundTrackPlayer.ViewModel
                         Track.Config.LoopBegin = result;
                     }
                 }
+                OnPropertyChanged(nameof(TrackLoopBeginString));
             });
 
             TrackLoopEndEntryUnforcusedCommand = new Command(async () =>
@@ -77,6 +78,7 @@ namespace SoundTrackPlayer.ViewModel
                         Track.Config.LoopEnd = result;
                     }
                 }
+                OnPropertyChanged(nameof(TrackLoopEndString));
             });
 
             LastLoopExecutionEntryForcusedCommand = new Command(() =>
@@ -98,21 +100,23 @@ namespace SoundTrackPlayer.ViewModel
                     }
                 }
                 _is_last_loop_execution_entry_focused = false;
+                OnPropertyChanged(nameof(LastLoopExecutionString));
             });
 
             TrackDefaultLoopCountEntryUnforcusedCommand = new Command(() =>
             {
                 if (Track is not null)
                 {
-                    if (uint.TryParse(_default_loop_count_string, out uint l))
-                    {
-                        Track.Config.LoopCount = l;
-                    }
-                    else
+                    if (string.IsNullOrEmpty(_default_loop_count_string))
                     {
                         Track.Config.LoopCount = null;
                     }
+                    else if (uint.TryParse(_default_loop_count_string, out uint l))
+                    {
+                        Track.Config.LoopCount = l;
+                    }
                 }
+                OnPropertyChanged(nameof(TrackDefaultLoopCountString));
             });
 
             CurrentLoopModePickerSelectedIndexChangedCommand = new Command(async () =>
@@ -133,6 +137,7 @@ namespace SoundTrackPlayer.ViewModel
                 {
                     await StaticResource.Player.SetLoopBegin(result);
                 }
+                OnPropertyChanged(nameof(CurrentLoopBeginString));
             });
 
             CurrentLoopEndEntryUnforcusedCommand = new Command(async () =>
@@ -145,6 +150,7 @@ namespace SoundTrackPlayer.ViewModel
                 {
                     await StaticResource.Player.SetLoopEnd(result);
                 }
+                OnPropertyChanged(nameof(CurrentLoopEndString));
             });
 
             TrackConfigSaveCommand = new Command(async () =>
