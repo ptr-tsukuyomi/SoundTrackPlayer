@@ -43,7 +43,7 @@
                                         <Label Margin="0,0,5,0" Text="{Binding Path=CurrentPosition, StringFormat='{0:hh}:{0:mm}:{0:ss}'}" Grid.Column="0" VerticalOptions="Center"  />
                                         <Label Text="{Binding Path=LastLoopExecutionString, StringFormat='[{0}]'}" VerticalOptions="Center" />
                                     </HorizontalStackLayout>
-                                    <Label Margin="5" Text="{Binding Path=Track.Info.Length, StringFormat='{0:hh}:{0:mm}:{0:ss}', FallbackValue='--:--:--'}" Grid.Column="2" VerticalOptions="Center"  />
+                                    <Label Margin="5" Text="{Binding Path=Track.Info.Length, StringFormat='{0:hh}:{0:mm}:{0:ss}', TargetNullValue='--:--:--', FallbackValue='--:--:--'}" Grid.Column="2" VerticalOptions="Center"  />
                                     <Slider Margin="5" Grid.Column="1" Value="{Binding Path=CurrentPositionInSeconds}" Maximum="{Binding Path=TrackLengthInSeconds}" 
                                     DragStartedCommand="{Binding Path=SliderDragStartedCommand}" DragCompletedCommand="{Binding Path=SliderDragCompletedCommand}" VerticalOptions="Center" />
                                 </Grid>

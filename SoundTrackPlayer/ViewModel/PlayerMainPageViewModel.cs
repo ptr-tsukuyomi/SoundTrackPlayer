@@ -88,7 +88,7 @@ namespace SoundTrackPlayer.ViewModel
 
             LastLoopExecutionEntryUnforcusedCommand = new Command(async () =>
             {
-                if (uint.TryParse(_last_loop_execution_string, out uint l))
+                if (StaticResource.Player.State != PlayerState.Stopped && uint.TryParse(_last_loop_execution_string, out uint l))
                 {
                     StaticResource.Player.LastLoopExecution = l;
                     if (l > 0)
@@ -128,27 +128,32 @@ namespace SoundTrackPlayer.ViewModel
 
             CurrentLoopBeginEntryUnforcusedCommand = new Command(async () =>
             {
-
-                if (_current_loop_begin_string == "")
+                if (StaticResource.Player.State != PlayerState.Stopped)
                 {
-                    await StaticResource.Player.SetLoopBegin(null);
-                }
-                else if (TimeSpan.TryParse(_current_loop_begin_string, out TimeSpan result))
-                {
-                    await StaticResource.Player.SetLoopBegin(result);
+                    if (_current_loop_begin_string == "")
+                    {
+                        await StaticResource.Player.SetLoopBegin(null);
+                    }
+                    else if (TimeSpan.TryParse(_current_loop_begin_string, out TimeSpan result))
+                    {
+                        await StaticResource.Player.SetLoopBegin(result);
+                    }
                 }
                 OnPropertyChanged(nameof(CurrentLoopBeginString));
             });
 
             CurrentLoopEndEntryUnforcusedCommand = new Command(async () =>
             {
-                if (_current_loop_end_string == "")
+                if (StaticResource.Player.State != PlayerState.Stopped)
                 {
-                    await StaticResource.Player.SetLoopEnd(null);
-                }
-                else if (TimeSpan.TryParse(_current_loop_end_string, out TimeSpan result))
-                {
-                    await StaticResource.Player.SetLoopEnd(result);
+                    if (_current_loop_end_string == "")
+                    {
+                        await StaticResource.Player.SetLoopEnd(null);
+                    }
+                    else if (TimeSpan.TryParse(_current_loop_end_string, out TimeSpan result))
+                    {
+                        await StaticResource.Player.SetLoopEnd(result);
+                    }
                 }
                 OnPropertyChanged(nameof(CurrentLoopEndString));
             });
@@ -409,7 +414,7 @@ namespace SoundTrackPlayer.ViewModel
             {
                 if (Track?.Config.LoopBegin is null)
                 {
-                    return "設定なし";
+                    return "未設定";
                 } else
                 {
                     return Track.Config.LoopBegin.Value.ToString(@"hh\:mm\:ss\.ffffff");
@@ -428,7 +433,7 @@ namespace SoundTrackPlayer.ViewModel
             {
                 if (Track?.Config.LoopEnd is null)
                 {
-                    return "設定なし";
+                    return "未設定";
                 }
                 else
                 {
@@ -555,7 +560,7 @@ namespace SoundTrackPlayer.ViewModel
             {
                 if (StaticResource.Player.LoopBegin is null)
                 {
-                    return "設定なし";
+                    return "未設定";
                 }
                 else
                 {
@@ -575,7 +580,7 @@ namespace SoundTrackPlayer.ViewModel
             {
                 if (StaticResource.Player.LoopEnd is null)
                 {
-                    return "設定なし";
+                    return "未設定";
                 }
                 else
                 {

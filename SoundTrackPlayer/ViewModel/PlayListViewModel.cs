@@ -1,4 +1,4 @@
-﻿//using Microsoft.UI.Xaml.Documents;
+//using Microsoft.UI.Xaml.Documents;
 using SoundTrackPlayer.Model;
 using System;
 using System.Collections.Generic;
@@ -119,5 +119,13 @@ namespace SoundTrackPlayer.ViewModel
             }
         }
         public ObservableCollection<PlayListTrackViewModel> _tracks;
+
+        public string Name
+        {
+            get
+            {
+                return _play_list.Name;
+            }
+        }
     }
 }

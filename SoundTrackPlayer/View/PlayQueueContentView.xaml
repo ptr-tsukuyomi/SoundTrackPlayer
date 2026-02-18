@@ -3,15 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SoundTrackPlayer.View.PlayQueueContentView"
              xmlns:vm="clr-namespace:SoundTrackPlayer.ViewModel"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:model="clr-namespace:SoundTrackPlayer.Model">
     <ContentView.Resources>
         <vm:PlayQueueViewModel x:Key="PlayQueueViewModel" />
+        <model:LoopModeToStringConverter x:Key="loop_mode_to_string_converter" />
     </ContentView.Resources>
     <ContentView.BindingContext>
         <StaticResource Key="PlayQueueViewModel"></StaticResource>
     </ContentView.BindingContext>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -21,7 +24,7 @@
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Label Text="再生キュー" FontAttributes="Bold" FontSize="20" VerticalOptions="Center" Margin="10"/>
+            <Label Text="再生キュー" Grid.Row="0" FontAttributes="Bold" FontSize="20" VerticalOptions="Center" Margin="10"/>
             <HorizontalStackLayout Grid.Row="1">
                 <Label Text="複数選択" VerticalOptions="Center" Margin="5" />
                 <Switch IsToggled="{Binding Path=IsMultipleSelectionEnabled}" VerticalOptions="Center" MinimumWidthRequest="0" Margin="5" />
@@ -31,7 +34,23 @@
             </HorizontalStackLayout>
             <BoxView HeightRequest="1" Color="Gray" Grid.Row="2" />
         </Grid>
-        <CollectionView SelectionChangedCommand="{Binding Path=SelectedTracksChangedCommand}" SelectedItem="{Binding Path=SelectedTrack}" SelectedItems="{Binding Path=SelectedTracks, Mode=TwoWay}" SelectionMode="{Binding Path=SelectionMode}" ItemsSource="{Binding Path=Tracks}" CanReorderItems="{Binding Path=ItemReorderEnabled}" Grid.Row="1" Margin="0,5,0,0">
+        <Grid Padding="5" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="130" />
+                <ColumnDefinition Width="70" />
+            </Grid.ColumnDefinitions>
+            <Label Text="" Grid.Column="0" VerticalOptions="Center" Margin="5"/>
+            <Label Text="タイトル" LineBreakMode="TailTruncation" Grid.Column="1" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループモード" Grid.Column="2" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループ開始位置" Grid.Column="3" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループ終了位置" Grid.Column="4" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループ区間再生回数" Grid.Column="5" VerticalOptions="Center" Margin="5,0,5,0"/>
+        </Grid>
+        <CollectionView SelectionChangedCommand="{Binding Path=SelectedTracksChangedCommand}" SelectedItem="{Binding Path=SelectedTrack}" SelectedItems="{Binding Path=SelectedTracks, Mode=TwoWay}" SelectionMode="{Binding Path=SelectionMode}" ItemsSource="{Binding Path=Tracks}" CanReorderItems="{Binding Path=ItemReorderEnabled}" Grid.Row="2" Margin="0,5,0,0">
             <CollectionView.Behaviors>
                 <toolkit:EventToCommandBehavior 
                     EventName="ReorderCompleted" 
@@ -45,9 +64,17 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="50" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="70" />
                         </Grid.ColumnDefinitions>
                         <ImageButton Source="{AppThemeBinding Light=play_light.png, Dark=play_dark.png}" Command="{Binding Path=PlayButtonCommand}" Grid.Column="0" WidthRequest="30" HeightRequest="30" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
-                        <Label Text="{Binding Path=Track.Info.Title}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Info.Title}" LineBreakMode="TailTruncation" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.DefaultLoopMode, Converter={StaticResource loop_mode_to_string_converter}}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="2" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.LoopBegin, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="3" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.LoopEnd, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="4" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.LoopCount, TargetNullValue='未設定'}" HorizontalOptions="End" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="5" VerticalOptions="Center" Margin="5"/>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
