@@ -214,9 +214,42 @@ namespace SoundTrackPlayer.ViewModel
                 StaticResource.Player.Queue.Clear();
             }, () => Tracks.Count > 0);
 
+            FindLoopBeginCommand = new Command(() =>
+            {
+                if (IsMultipleSelectionEnabled)
+                {
+                    if (SelectedTracks is null) return;
+
+                    var targets = SelectedTracks.ToList();
+
+                    foreach (PlayQueueTrackViewModel e in targets)
+                    {
+                        var bg_task = LoopPoint.CreateFindLoopBeginTask(e.Track);
+                        StaticResource.BackgroundTaskRunner.Enqueue(bg_task);
+                    }
+                }
+                else
+                {
+                    if (SelectedTrack is null) return;
+                    var bg_task = LoopPoint.CreateFindLoopBeginTask(((PlayQueueTrackViewModel)SelectedTrack).Track);
+                    StaticResource.BackgroundTaskRunner.Enqueue(bg_task);
+                }
+            }, () =>
+            {
+                if (IsMultipleSelectionEnabled)
+                {
+                    return SelectedTracks is not null && SelectedTracks.Count > 0;
+                }
+                else
+                {
+                    return SelectedTrack is not null;
+                }
+            });
+
             SelectedTracksChangedCommand = new Command(() =>
             {
                 DeleteCommand.ChangeCanExecute();
+                FindLoopBeginCommand.ChangeCanExecute();
             });
         }
 
@@ -343,6 +376,8 @@ namespace SoundTrackPlayer.ViewModel
         public Command AddCommand { get; set; }
         public Command DeleteCommand { get; set; }
         public Command ClearCommand { get; set; }
+
+        public Command FindLoopBeginCommand { get; set; }
 
         public System.Collections.Generic.IList<object>? SelectedTracks
         {
