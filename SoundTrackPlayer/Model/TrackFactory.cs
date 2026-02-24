@@ -51,7 +51,6 @@ namespace SoundTrackPlayer.Model
                 Config = config ?? new TrackConfig()
             };
 
-            //
             track.Info = LoadTrackInfo(file_path);
 
             FileOriginTracks.Add(file_path, track);
