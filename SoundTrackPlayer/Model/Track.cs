@@ -39,6 +39,8 @@ namespace SoundTrackPlayer.Model
         public TrackInfo() {}
 
         [ObservableProperty]
+        public partial uint? No { get; set; } = null;
+        [ObservableProperty]
         public partial string? Title { get; set; } = null;
         [ObservableProperty]
         public partial TimeSpan? Length { get; set; } = null;

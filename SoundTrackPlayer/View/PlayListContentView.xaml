@@ -32,6 +32,7 @@
         <Grid Padding="5" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="130" />
@@ -39,11 +40,12 @@
                 <ColumnDefinition Width="70" />
             </Grid.ColumnDefinitions>
             <Label Text="" Grid.Column="0" VerticalOptions="Center" Margin="5"/>
-            <Label Text="タイトル" LineBreakMode="TailTruncation" Grid.Column="1" VerticalOptions="Center" Margin="5,0,5,0"/>
-            <Label Text="ループモード" Grid.Column="2" VerticalOptions="Center" Margin="5,0,5,0"/>
-            <Label Text="ループ開始位置" Grid.Column="3" VerticalOptions="Center" Margin="5,0,5,0"/>
-            <Label Text="ループ終了位置" Grid.Column="4" VerticalOptions="Center" Margin="5,0,5,0"/>
-            <Label Text="ループ区間再生回数" Grid.Column="5" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="No" Grid.Column="1" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="タイトル" LineBreakMode="TailTruncation" Grid.Column="2" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループモード" Grid.Column="3" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループ開始位置" Grid.Column="4" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループ終了位置" Grid.Column="5" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="ループ区間再生回数" Grid.Column="6" VerticalOptions="Center" Margin="5,0,5,0"/>
         </Grid>
         <CollectionView SelectionMode="Single" ItemsSource="{Binding Path=Tracks}" Grid.Row="2">
             <CollectionView.ItemTemplate>
@@ -51,6 +53,7 @@
                     <Grid Padding="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="30" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="100" />
                             <ColumnDefinition Width="130" />
@@ -58,11 +61,12 @@
                             <ColumnDefinition Width="70" />
                         </Grid.ColumnDefinitions>
                         <ImageButton Source="{AppThemeBinding Light=play_light.png, Dark=play_dark.png}" Command="{Binding Path=PlayButtonCommand}" Grid.Column="0" WidthRequest="30" HeightRequest="30" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
-                        <Label Text="{Binding Path=Track.Info.Title}" LineBreakMode="TailTruncation" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.DefaultLoopMode, Converter={StaticResource loop_mode_to_string_converter}}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="2" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.LoopBegin, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="3" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.LoopEnd, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="4" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.LoopCount, TargetNullValue='未設定'}" HorizontalOptions="End" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="5" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Info.No}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Info.Title}" LineBreakMode="TailTruncation" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="2" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.DefaultLoopMode, Converter={StaticResource loop_mode_to_string_converter}}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="3" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.LoopBegin, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="4" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.LoopEnd, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="5" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=Track.Config.LoopCount, TargetNullValue='未設定'}" HorizontalOptions="End" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="6" VerticalOptions="Center" Margin="5"/>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

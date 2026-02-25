@@ -18,6 +18,10 @@ namespace SoundTrackPlayer.Model
                 {
                     info.Title = s;
                 }
+                if (result.Tag.Track is uint t)
+                {
+                    info.No = t;
+                }
             }
 
             return info;
