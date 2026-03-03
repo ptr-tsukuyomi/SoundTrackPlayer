@@ -74,7 +74,7 @@
                             <ColumnDefinition Width="70" />
                         </Grid.ColumnDefinitions>
                         <ImageButton Source="{AppThemeBinding Light=play_light.png, Dark=play_dark.png}" Command="{Binding Path=PlayButtonCommand}" Grid.Column="0" WidthRequest="30" HeightRequest="30" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
-                        <Label Text="{Binding Path=Track.Info.No}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
+                        <Label Text="{Binding Path=TrackNoInPlayQueue}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
                         <Label Text="{Binding Path=Track.Info.Title}" LineBreakMode="TailTruncation" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="2" VerticalOptions="Center" Margin="5"/>
                         <Label Text="{Binding Path=Track.Config.DefaultLoopMode, Converter={StaticResource loop_mode_to_string_converter}}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="3" VerticalOptions="Center" Margin="5"/>
                         <Label Text="{Binding Path=Track.Config.LoopBegin, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="4" VerticalOptions="Center" Margin="5"/>
