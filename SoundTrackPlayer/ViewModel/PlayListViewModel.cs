@@ -1,25 +1,17 @@
-//using Microsoft.UI.Xaml.Documents;
+using CommunityToolkit.Mvvm.ComponentModel;
 using SoundTrackPlayer.Model;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-//using Windows.Media.Playlists;
+
 
 namespace SoundTrackPlayer.ViewModel
 {
-    public class PlayListTrackViewModel : INotifyPropertyChanged
+    public partial class PlayListTrackViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         private bool _is_playing;
 
         private PlayList _play_list;
-        public PlayListTrackViewModel(Track t, PlayList p)
+        public PlayListTrackViewModel(Track t, PlayList p, int trackNoInPlayList)
         {
             Track = t;
             _play_list = p;
@@ -28,30 +20,16 @@ namespace SoundTrackPlayer.ViewModel
             {
                 await StaticResource.Player.Stop();
                 StaticResource.Player.Queue.Clear();
-                //foreach (var e in _play_list.Tracks)
-                //{
-                //    StaticResource.Player.Queue.Append(e);
-                //}
                 StaticResource.Player.Queue.Append(_play_list.Tracks);
                 StaticResource.Player.Queue.SetCurrentTrack(Track);
                 await StaticResource.Player.Play();
             });
             IsPlaying = StaticResource.Player.Queue.CurrentTrack == Track;
+            TrackNoInPlayList = trackNoInPlayList;
         }
 
-        public FontAttributes FontAttributes
-        { 
-            get
-            {
-                return _font_attributes;
-            }
-            set
-            {
-                _font_attributes = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FontAttributes)));
-            }
-        }
-        private FontAttributes _font_attributes = FontAttributes.None;
+        [ObservableProperty]
+        public partial FontAttributes FontAttributes { get; set; } = FontAttributes.None;
 
         public bool IsPlaying
         {
@@ -75,20 +53,20 @@ namespace SoundTrackPlayer.ViewModel
         public Track Track { get; set; }
 
         public Command PlayButtonCommand { get; set; }
+
+        [ObservableProperty]
+        public partial int TrackNoInPlayList { get; set; }
     }
 
-    public class PlayListViewModel : INotifyPropertyChanged
+    public partial class PlayListViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         private PlayList _play_list;
 
         public PlayListViewModel(PlayList play_list)
         {
             _play_list = play_list;
-            //StaticResource.Player.Queue.QueueChanged += Queue_QueueChanged;
             StaticResource.Player.Queue.CurrentTrackChanged += Queue_CurrentTrackChanged;
-            _tracks = new ObservableCollection<PlayListTrackViewModel>(_play_list.Tracks.Select((e) => new PlayListTrackViewModel(e, _play_list)));
+            Tracks = new ObservableCollection<PlayListTrackViewModel>(_play_list.Tracks.Select((e, i) => new PlayListTrackViewModel(e, _play_list, i + 1)));
         }
 
         private void Queue_CurrentTrackChanged(object? sender, Track? e)
@@ -98,27 +76,11 @@ namespace SoundTrackPlayer.ViewModel
                 var is_playing = track.Track == StaticResource.Player.Queue.CurrentTrack;
                 track.IsPlaying = is_playing;
             }
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
+            OnPropertyChanged(nameof(Tracks));
         }
 
-        //private void Queue_QueueChanged(object? sender, EventArgs e)
-        //{
-        //    Tracks = new ObservableCollection<PlayListTrackViewModel>(_play_list.Tracks.Select((e) => new PlayListTrackViewModel(e, _play_list)));
-        //}
-
-        public ObservableCollection<PlayListTrackViewModel> Tracks
-        {
-            get
-            {
-                return _tracks;
-            }
-            set
-            {
-                _tracks = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
-            }
-        }
-        public ObservableCollection<PlayListTrackViewModel> _tracks;
+        [ObservableProperty]
+        public partial ObservableCollection<PlayListTrackViewModel> Tracks { get; set; }
 
         public string Name
         {

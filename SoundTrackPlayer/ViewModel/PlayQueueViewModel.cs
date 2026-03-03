@@ -1,22 +1,14 @@
-//using Microsoft.UI.Xaml.Documents;
+using CommunityToolkit.Mvvm.ComponentModel;
 using SoundTrackPlayer.Model;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace SoundTrackPlayer.ViewModel
 {
-    public class PlayQueueTrackViewModel : INotifyPropertyChanged
+    public partial class PlayQueueTrackViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         private bool _is_playing;
-        public PlayQueueTrackViewModel(Track t)
+        public PlayQueueTrackViewModel(Track t, int trackNoInPlayQueue)
         {
             Track = t;
             PlayButtonCommand = new Command(async () =>
@@ -35,25 +27,14 @@ namespace SoundTrackPlayer.ViewModel
                 }
             }, () =>
             {
-                //return !_is_playing;
                 return true;
             });
             IsPlaying = StaticResource.Player.Queue.CurrentTrack == Track;
+            TrackNoInPlayQueue = trackNoInPlayQueue;
         }
 
-        public FontAttributes FontAttributes
-        { 
-            get
-            {
-                return _font_attributes;
-            }
-            set
-            {
-                _font_attributes = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FontAttributes)));
-            }
-        }
-        private FontAttributes _font_attributes = FontAttributes.None;
+        [ObservableProperty]
+        public partial FontAttributes FontAttributes { get; set; } = FontAttributes.None;
 
         public bool IsPlaying
         {
@@ -71,24 +52,33 @@ namespace SoundTrackPlayer.ViewModel
                 {
                     FontAttributes = FontAttributes.None;
                 }
-                //PlayButtonCommand.ChangeCanExecute();
             }
         }
 
         public Track Track { get; set; }
 
         public Command PlayButtonCommand { get; set; }
+
+        [ObservableProperty]
+        public partial int TrackNoInPlayQueue { get; set; }
     }
 
-    public class PlayQueueViewModel : INotifyPropertyChanged
+    public partial class PlayQueueViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        private void CalculateTrackNoInPlayQueue(int begin = 0, int end = -1)
+        {
+            if (Tracks is null) throw new Exception();
+            for (int i = begin; i < (end < 0 ? Tracks.Count : Math.Min(end + 1, Tracks.Count)); ++i)
+            {
+                Tracks[i].TrackNoInPlayQueue = i + 1;
+            }
+        }
 
         public PlayQueueViewModel()
         {
             StaticResource.Player.Queue.QueueChanged += Queue_QueueChanged;
             StaticResource.Player.Queue.CurrentTrackChanged += Queue_CurrentTrackChanged;
-            Tracks = new ObservableCollection<PlayQueueTrackViewModel>(StaticResource.Player.Queue.GetTracks().Select((e) => new PlayQueueTrackViewModel(e)));
+            Tracks = new ObservableCollection<PlayQueueTrackViewModel>(StaticResource.Player.Queue.GetTracks().Select((e, i) => new PlayQueueTrackViewModel(e, i + 1)));
 
             ReorderCompletedCommand = new Command(() =>
             {
@@ -110,6 +100,7 @@ namespace SoundTrackPlayer.ViewModel
                                         if (target_item is null) throw new Exception();
 
                                         StaticResource.Player.Queue.InsertOrMove(target_item.Track, e.NewStartingIndex);
+                                        CalculateTrackNoInPlayQueue(begin: e.NewStartingIndex);
                                     }
                                     break;
                                 case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
@@ -123,6 +114,7 @@ namespace SoundTrackPlayer.ViewModel
                                         if (target_item is null) throw new Exception();
 
                                         StaticResource.Player.Queue.Remove(target_item.Track);
+                                        CalculateTrackNoInPlayQueue(begin: target_item.TrackNoInPlayQueue - 1);
                                     }
                                     break;
                                 case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
@@ -156,6 +148,7 @@ namespace SoundTrackPlayer.ViewModel
                                 if (!target_item_0.Equals(target_item_1)) throw new Exception();
 
                                 StaticResource.Player.Queue.InsertOrMove(target_item_0.Track, e1.NewStartingIndex);
+                                CalculateTrackNoInPlayQueue(begin: Math.Min(target_item_0.TrackNoInPlayQueue - 1, e1.NewStartingIndex));
                             } else
                             {
                                 throw new NotImplementedException();
@@ -263,7 +256,7 @@ namespace SoundTrackPlayer.ViewModel
                     track.IsPlaying = is_playing;
                 }
             }
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
+            OnPropertyChanged(nameof(Tracks));
         }
 
         private void Queue_QueueChanged(object? sender, QueueChangedEventArgs e)
@@ -282,19 +275,28 @@ namespace SoundTrackPlayer.ViewModel
                 case QueueChangeAction.Add:
                     {
                         if (e.Tracks is null) throw new Exception();
-                        foreach (var t in e.Tracks)
+
+                        for (int i = 0; i < e.Tracks.Count(); ++i)
                         {
-                            Tracks.Insert(e.NewStartingIndex, new PlayQueueTrackViewModel(t));
+                            Tracks.Insert(e.NewStartingIndex + i, new PlayQueueTrackViewModel(e.Tracks.ElementAt(i), e.NewStartingIndex + i + 1));
                         }
+                        CalculateTrackNoInPlayQueue(begin: e.NewStartingIndex + e.Tracks.Count());
                     }
                     break;
                 case QueueChangeAction.Remove:
                     {
                         if (e.Tracks is null) throw new Exception();
+                        var min_track_no_in_play_queue = -1;
                         foreach (Track t in e.Tracks)
                         {
                             var target = Tracks!.First((vm) => vm.Track == t);
+                            min_track_no_in_play_queue = min_track_no_in_play_queue == -1 ? target.TrackNoInPlayQueue : Math.Min(min_track_no_in_play_queue, target.TrackNoInPlayQueue);
                             Tracks?.Remove(target);
+                        }
+
+                        if (min_track_no_in_play_queue != -1)
+                        {
+                            CalculateTrackNoInPlayQueue(begin: min_track_no_in_play_queue - 1);
                         }
                     }
                     break;
@@ -306,12 +308,13 @@ namespace SoundTrackPlayer.ViewModel
                         if (e.Tracks is null || e.Tracks.Count() != 1) throw new Exception();
                         var t = e.Tracks.First();
                         Tracks.Move(e.OldStartingIndex, e.NewStartingIndex);
+                        CalculateTrackNoInPlayQueue(begin: Math.Min(e.OldStartingIndex, e.NewStartingIndex));
                     }
                     break;
             }
 
+            _collection_changed_events.Clear();
             ClearCommand.ChangeCanExecute();
-            //Tracks = new ObservableCollection<PlayQueueTrackViewModel>(StaticResource.Player.Queue.GetTracks().Select((e) => new PlayQueueTrackViewModel(e)));
         }
 
         public ObservableCollection<PlayQueueTrackViewModel>? Tracks
@@ -327,7 +330,7 @@ namespace SoundTrackPlayer.ViewModel
                 {
                     _tracks.CollectionChanged += _tracks_CollectionChanged;
                 }
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
+                OnPropertyChanged(nameof(Tracks));
             }
         }
 
@@ -350,9 +353,9 @@ namespace SoundTrackPlayer.ViewModel
             set
             {
                 _is_multiple_selection_enabled = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsMultipleSelectionEnabled)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ItemReorderEnabled)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectionMode)));
+                OnPropertyChanged(nameof(IsMultipleSelectionEnabled));
+                OnPropertyChanged(nameof(ItemReorderEnabled));
+                OnPropertyChanged(nameof(SelectionMode));
             }
         }
         private bool _is_multiple_selection_enabled = false;
@@ -379,33 +382,11 @@ namespace SoundTrackPlayer.ViewModel
 
         public Command FindLoopBeginCommand { get; set; }
 
-        public System.Collections.Generic.IList<object>? SelectedTracks
-        {
-            get
-            {
-                return _selected_tracks;
-            }
-            set
-            {
-                _selected_tracks = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedTracks)));
-            }
-        }
-        private System.Collections.Generic.IList<object>? _selected_tracks = null;
+        [ObservableProperty]
+        public partial System.Collections.Generic.IList<object>? SelectedTracks { get; set; } = null;
 
-        public object? SelectedTrack
-        {
-            get
-            {
-                return _selected_track;
-            }
-            set
-            {
-                _selected_track = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedTrack)));
-            }
-        }
-        private object? _selected_track = null;
+        [ObservableProperty]
+        public partial object? SelectedTrack { get; set; } = null;
 
         public Command SelectedTracksChangedCommand { get; set; }
     }
