@@ -203,6 +203,8 @@
                             </HorizontalStackLayout>
                             <HorizontalStackLayout FlowDirection="RightToLeft" Grid.Column="2" VerticalOptions="Center" >
                                 <HorizontalStackLayout FlowDirection="LeftToRight">
+                                    <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Command="{Binding ShuffleModeButtonClickCommand}" Source="{Binding ShuffleModeButtonImageSource}" VerticalOptions="Center" />
+                                    <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Command="{Binding ContinuousPlayModeButtonClickCommand}" Source="{Binding ContinuousPlayModeButtonImageSource}" VerticalOptions="Center" />
                                     <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Command="{Binding VolumeButtonClickCommand}" Source="{Binding VolumeButtonImageSource}" VerticalOptions="Center" />
                                     <Slider Margin="5" WidthRequest="100" Value="{Binding Path=Volume}" VerticalOptions="Center" ></Slider>
                                 </HorizontalStackLayout>

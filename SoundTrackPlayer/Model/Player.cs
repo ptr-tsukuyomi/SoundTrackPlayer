@@ -12,7 +12,7 @@ namespace SoundTrackPlayer.Model
 
     }
 
-    public class CannotDetermineLoopEndException: Exception
+    public class CannotDetermineLoopEndException : Exception
     {
 
     }
@@ -36,6 +36,18 @@ namespace SoundTrackPlayer.Model
         Clear
     }
 
+    public enum ShuffleMode
+    {
+        Off,
+        On
+    }
+    public enum ContinuousPlayMode
+    {
+        Off,
+        Queue
+    }
+
+
     public class QueueChangedEventArgs
     {
         public QueueChangeAction Action { get; set; } = QueueChangeAction.Clear;
@@ -57,6 +69,22 @@ namespace SoundTrackPlayer.Model
         public Track? CurrentTrack { get { return queue.Count == 0 || current_track_no == -1 ? null : queue[current_track_no]; } }
         public int CurrentTrackNo { get { return current_track_no; } }
 
+        public void Shuffle(Track? head = null)
+        {
+            int shuffle_begin = 0;
+            if(head != null)
+            {
+                if (!queue.Contains(head)) throw new ArgumentException("head must be in the queue");
+                InsertOrMove(head, 0);
+                shuffle_begin = 1;
+            }
+
+            int[] index = Enumerable.Range(shuffle_begin, queue.Count - shuffle_begin).Shuffle().ToArray();
+            for(int i = shuffle_begin; i < index.Length; ++i)
+            {
+                InsertOrMove(queue[index[i]], i);
+            }
+        }
 
         public bool SetCurrentTrack(Track track)
         {
@@ -89,7 +117,8 @@ namespace SoundTrackPlayer.Model
             if (current_track_no == -1)
             {
                 current_track_no = 0;
-            } else
+            }
+            else
             {
                 current_track_no += 1;
             }
@@ -107,7 +136,8 @@ namespace SoundTrackPlayer.Model
             if (current_track_no == -1)
             {
                 current_track_no = queue.Count - 1;
-            } else
+            }
+            else
             {
                 current_track_no -= 1;
             }
@@ -165,7 +195,8 @@ namespace SoundTrackPlayer.Model
                 if (is_current_track_targeted)
                 {
                     current_track_no = -1;
-                } else if (old_index < current_track_no)
+                }
+                else if (old_index < current_track_no)
                 {
                     --current_track_no;
                 }
@@ -184,7 +215,8 @@ namespace SoundTrackPlayer.Model
             if (old_index == -1) // insert only
             {
                 QueueChanged?.Invoke(this, new QueueChangedEventArgs() { Action = QueueChangeAction.Add, Tracks = [t], NewStartingIndex = insert_to });
-            } else
+            }
+            else
             {
                 QueueChanged?.Invoke(this, new QueueChangedEventArgs() { Action = QueueChangeAction.Move, Tracks = [t], NewStartingIndex = insert_to, OldStartingIndex = old_index });
             }
@@ -226,7 +258,7 @@ namespace SoundTrackPlayer.Model
         private Task _loop_watch_task = Task.CompletedTask;
         private Task _device_watch_task = Task.CompletedTask;
 
-        public Track? Track { get { return _track; }}
+        public Track? Track { get { return _track; } }
         private Track? _track = null;
         public LoopMode DefaultTrackLoopMode
         {
@@ -380,7 +412,7 @@ namespace SoundTrackPlayer.Model
         private SoundFlow.Providers.StreamDataProvider LoadTrackData(Track t)
         {
             if (t.Source is null) throw new TrackDataLoadException();
-            
+
 
             _stream = t.Source.Open();
             if (_stream is null) throw new TrackDataLoadException();
@@ -412,7 +444,8 @@ namespace SoundTrackPlayer.Model
                 try
                 {
                     await loop_watch_timer.WaitForNextTickAsync(ct);
-                } catch (OperationCanceledException)
+                }
+                catch (OperationCanceledException)
                 {
                     break;
                 }
@@ -484,7 +517,7 @@ namespace SoundTrackPlayer.Model
                 _playback_device = _engine.SwitchDevice(_playback_device, new_device_info);
             }
         }
-        
+
 
         public async Task<bool> Seek(TimeSpan to)
         {
@@ -688,7 +721,7 @@ namespace SoundTrackPlayer.Model
 
         public async Task SetTrack(Track? t)
         {
-            await Stop(); 
+            await Stop();
             _track = t;
             TrackChanged?.Invoke(this, new EventArgs());
         }
@@ -719,12 +752,7 @@ namespace SoundTrackPlayer.Model
 
         private void Pc_PlaybackCompleted(object? sender, EventArgs e)
         {
-            if (!Queue.Next())
-            {
-                TrackQueueCompleted?.Invoke(this, new EventArgs());
-                State = PlayerState.Stopped;
-                Queue.SetCurrentTrack(0);
-            }
+            Next();
         }
 
         public event EventHandler<Track?>? TrackSkipped;
@@ -774,7 +802,7 @@ namespace SoundTrackPlayer.Model
         }
 
         public LoopMode CurrentTrackLoopMode
-        { 
+        {
             get
             {
                 return pc.CurrentTrackLoopMode;
@@ -866,6 +894,37 @@ namespace SoundTrackPlayer.Model
             return await pc.Seek(to);
         }
 
+        private void Next()
+        {
+            if (!Queue.Next())
+            {
+                TrackQueueCompleted?.Invoke(this, new EventArgs());
+                switch (ContinuousPlayMode)
+                {
+                    case ContinuousPlayMode.Off:
+                        State = PlayerState.Stopped;
+                        Queue.SetCurrentTrack(0);
+                        break;
+                    case ContinuousPlayMode.Queue:
+                        switch (ShuffleMode) 
+                        {
+                            case ShuffleMode.Off:
+                                break;
+                            case ShuffleMode.On:
+                                // shuffle queue
+                                Queue.Shuffle();
+                                break;
+                            default:
+                                throw new NotImplementedException();
+                        }
+                        Queue.SetCurrentTrack(0);
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+        }
+
         private async void Queue_CurrentTrackChanged(object? sender, Track? e)
         {
             switch (State)
@@ -877,7 +936,8 @@ namespace SoundTrackPlayer.Model
                         await pc.Stop();
                         await pc.SetTrack(null);
                         State = PlayerState.Stopped;
-                    } else
+                    }
+                    else
                     {
                         // change track and play
                         await pc.Stop();
@@ -889,12 +949,13 @@ namespace SoundTrackPlayer.Model
                         catch (Exception)
                         {
                             TrackSkipped?.Invoke(this, e);
-                            if (!Queue.Next())
-                            {
-                                TrackQueueCompleted?.Invoke(this, new EventArgs());
-                                State = PlayerState.Stopped;
-                                Queue.SetCurrentTrack(0);
-                            }
+                            Next();
+                            //if (!Queue.Next())
+                            //{
+                            //    TrackQueueCompleted?.Invoke(this, new EventArgs());
+                            //    State = PlayerState.Stopped;
+                            //    Queue.SetCurrentTrack(0);
+                            //}
                         }
                     }
                     break;
@@ -906,28 +967,30 @@ namespace SoundTrackPlayer.Model
                     {
                         // change track
                         await pc.SetTrack(e);
-                    } else
+                    }
+                    else
                     {
                         await pc.SetTrack(null);
                     }
-                        break;
+                    break;
                 case PlayerState.Stopped:
                     if (e is not null)
                     {
                         // change track
                         await pc.SetTrack(e);
-                    } else
+                    }
+                    else
                     {
                         await pc.SetTrack(null);
                     }
-                        break;
+                    break;
             }
             TrackChanged?.Invoke(this, e);
         }
 
 
 
-        public async Task Play()
+        public async Task Play(Track? begin = null)
         {
             if (State == PlayerState.Paused)
             {
@@ -938,11 +1001,29 @@ namespace SoundTrackPlayer.Model
             {
                 State = PlayerState.Playing;
                 await pc.Stop();
-                if (Queue.CurrentTrack is null && !Queue.Next())
+                if (Queue.CurrentTrack is null && !Queue.Next() || begin != null && !Queue.GetTracks().Contains(begin))
                 {
                     State = PlayerState.Stopped;
                     throw new PlayableTrackNotFoundException();
                 }
+
+                switch (ShuffleMode)
+                {
+                    case ShuffleMode.Off:
+                        break;
+                    case ShuffleMode.On:
+                        // shuffle queue
+                        Queue.Shuffle(begin);
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                if (begin != null)
+                {
+                    Queue.SetCurrentTrack(begin);
+                }
+
                 try
                 {
                     await pc.Play();
@@ -950,12 +1031,13 @@ namespace SoundTrackPlayer.Model
                 catch (Exception)
                 {
                     TrackSkipped?.Invoke(this, pc.Track);
-                    if (!Queue.Next())
-                    {
-                        TrackQueueCompleted?.Invoke(this, new EventArgs());
-                        State = PlayerState.Stopped;
-                        Queue.SetCurrentTrack(0);
-                    }
+                    Next();
+                    //if (!Queue.Next())
+                    //{
+                    //    TrackQueueCompleted?.Invoke(this, new EventArgs());
+                    //    State = PlayerState.Stopped;
+                    //    Queue.SetCurrentTrack(0);
+                    //}
                 }
             }
         }
@@ -974,5 +1056,9 @@ namespace SoundTrackPlayer.Model
             pc.Pause();
             State = PlayerState.Paused;
         }
+
+
+        public Model.ContinuousPlayMode ContinuousPlayMode { get; set; } = ContinuousPlayMode.Off;
+        public Model.ShuffleMode ShuffleMode { get; set; } = ShuffleMode.Off;
     }
 }

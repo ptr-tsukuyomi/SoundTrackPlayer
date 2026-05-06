@@ -20,6 +20,42 @@ namespace SoundTrackPlayer.Model
             }
         }
 
+        public static bool IsMuted
+        {
+            get
+            {
+                return Preferences.Default.Get("IsMuted", false);
+            }
+            set
+            {
+                Preferences.Default.Set("IsMuted", value);
+            }
+        }
+
+        public static Model.ShuffleMode ShuffleMode
+        {
+            get
+            {
+                return (Model.ShuffleMode)Preferences.Default.Get("ShuffleMode", (int)Model.ShuffleMode.Off);
+            }
+            set
+            {
+                Preferences.Default.Set("ShuffleMode", ((int)value));
+            }
+        }
+
+        public static Model.ContinuousPlayMode ContinuousPlayMode
+        {
+            get {
+                return (Model.ContinuousPlayMode)Preferences.Default.Get("ContinuousPlayMode", (int)Model.ContinuousPlayMode.Off);
+            }
+            set
+            {
+                Preferences.Default.Set("ContinuousPlayMode", ((int)value));
+            }
+        }
+                
+
         public static List<string> PlayListSources
         {
             get

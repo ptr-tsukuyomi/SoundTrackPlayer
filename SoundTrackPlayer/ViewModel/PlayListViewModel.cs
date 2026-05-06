@@ -21,8 +21,8 @@ namespace SoundTrackPlayer.ViewModel
                 await StaticResource.Player.Stop();
                 StaticResource.Player.Queue.Clear();
                 StaticResource.Player.Queue.Append(_play_list.Tracks);
-                StaticResource.Player.Queue.SetCurrentTrack(Track);
-                await StaticResource.Player.Play();
+                //StaticResource.Player.Queue.SetCurrentTrack(Track);
+                await StaticResource.Player.Play(Track);
             });
             IsPlaying = StaticResource.Player.Queue.CurrentTrack == Track;
             TrackNoInPlayList = trackNoInPlayList;

@@ -9,7 +9,11 @@ namespace SoundTrackPlayer.Model
 {
     public static class StaticResource
     {
-        public static Player Player { get; set; } = new();
+        public static Player Player { get; set; } = new()
+        {
+            ShuffleMode = Config.ShuffleMode,
+            ContinuousPlayMode = Config.ContinuousPlayMode
+        };
 
         public static ObservableCollection<PlayList> PlayLists { get; set; } = [];
 

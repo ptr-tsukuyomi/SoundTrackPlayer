@@ -190,6 +190,20 @@ namespace SoundTrackPlayer.ViewModel
                 IsMuted = !IsMuted;
             });
 
+            ShuffleModeButtonClickCommand = new Command(() =>
+            {
+                StaticResource.Player.ShuffleMode = StaticResource.Player.ShuffleMode == ShuffleMode.On ? ShuffleMode.Off : ShuffleMode.On;
+                Config.ShuffleMode = StaticResource.Player.ShuffleMode;
+                OnPropertyChanged(nameof(ShuffleModeButtonImageSource));
+            });
+
+            ContinuousPlayModeButtonClickCommand = new Command(() =>
+            {
+                StaticResource.Player.ContinuousPlayMode = StaticResource.Player.ContinuousPlayMode == ContinuousPlayMode.Queue ? ContinuousPlayMode.Off : ContinuousPlayMode.Queue;
+                Config.ContinuousPlayMode = StaticResource.Player.ContinuousPlayMode;
+                OnPropertyChanged(nameof(ContinuousPlayModeButtonImageSource));
+            });
+
             var content_dir = Config.ContentDirectories;
             foreach (var dir in content_dir)
             {
@@ -375,11 +389,45 @@ namespace SoundTrackPlayer.ViewModel
             {
                 _is_muted = value;
                 StaticResource.Player.Volume = _is_muted ? 0.0f : (float)_volume;
+                Config.IsMuted = _is_muted;
                 OnPropertyChanged(nameof(IsMuted));
                 OnPropertyChanged(nameof(VolumeButtonImageSource));
             }
         }
-        private bool _is_muted = false;
+        private bool _is_muted = Config.IsMuted;
+
+        public ImageSource ShuffleModeButtonImageSource
+        {
+            get
+            {
+                if (Application.Current is null) throw new Exception();
+                string theme = Application.Current.RequestedTheme == AppTheme.Dark ? "dark" : "light";
+
+                return StaticResource.Player.ShuffleMode switch
+                {
+                    ShuffleMode.Off => ImageSource.FromFile($"shuffle_off_{theme}.png"),
+                    ShuffleMode.On => ImageSource.FromFile($"shuffle_on_{theme}.png"),
+                    _ => throw new NotImplementedException()
+                };
+            }
+        }
+
+        public ImageSource ContinuousPlayModeButtonImageSource
+        {
+            get
+            {
+                if (Application.Current is null) throw new Exception();
+                string theme = Application.Current.RequestedTheme == AppTheme.Dark ? "dark" : "light";
+
+                return StaticResource.Player.ContinuousPlayMode switch
+                {
+                    ContinuousPlayMode.Off => ImageSource.FromFile($"continuous_play_off_{theme}.png"),
+                    ContinuousPlayMode.Queue => ImageSource.FromFile($"continuous_play_queue_{theme}.png"),
+                    _ => throw new NotImplementedException()
+                };
+            }
+        }
+
 
         public TimeSpan CurrentPosition
         {
@@ -676,6 +724,10 @@ namespace SoundTrackPlayer.ViewModel
         public Command LoopBeginFindCommand { get; set; }
 
         public Command VolumeButtonClickCommand { get; set; }
+
+        public Command ShuffleModeButtonClickCommand { get; set; }
+
+        public Command ContinuousPlayModeButtonClickCommand { get; set; }
         #endregion
 
 
