@@ -405,8 +405,8 @@ namespace SoundTrackPlayer.ViewModel
 
                 return StaticResource.Player.ShuffleMode switch
                 {
-                    ShuffleMode.Off => ImageSource.FromFile($"shuffle_off_{theme}.png"),
-                    ShuffleMode.On => ImageSource.FromFile($"shuffle_on_{theme}.png"),
+                    ShuffleMode.Off => ImageSource.FromFile($"arrow_right_{theme}.png"),
+                    ShuffleMode.On => ImageSource.FromFile($"shuffle_{theme}.png"),
                     _ => throw new NotImplementedException()
                 };
             }
@@ -422,7 +422,7 @@ namespace SoundTrackPlayer.ViewModel
                 return StaticResource.Player.ContinuousPlayMode switch
                 {
                     ContinuousPlayMode.Off => ImageSource.FromFile($"continuous_play_off_{theme}.png"),
-                    ContinuousPlayMode.Queue => ImageSource.FromFile($"continuous_play_queue_{theme}.png"),
+                    ContinuousPlayMode.Queue => ImageSource.FromFile($"continuous_play_on_{theme}.png"),
                     _ => throw new NotImplementedException()
                 };
             }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="15"
+   height="15"
+   viewBox="0 0 15 15"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="loop.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="43.675629"
+     inkscape:cx="5.4149192"
+     inkscape:cy="8.8035366"
+     inkscape:window-width="2150"
+     inkscape:window-height="1477"
+     inkscape:window-x="310"
+     inkscape:window-y="310"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1" />
+  <path
+     d="m 13.49994,7.00021 c -0.27614,0 -0.5,0.22385 -0.5,0.5 0,1.93299 -1.56701,3.49999 -3.5000002,3.49999 h -7.29294 l 1.1465,-1.14648 0.0644,-0.07812 c 0.1282,-0.19408 0.1064,-0.45804 -0.0644,-0.62891 -0.1709,-0.17086 -0.4349,-0.19262 -0.629,-0.06445 l -0.0781,0.06445 -2.00000005,2.00001 c -0.1952,0.1953 -0.1952,0.5118 0,0.707 l 2.00000005,2 c 0.1953,0.1953 0.5118,0.1953 0.7071,0 0.1952,-0.1952 0.1952,-0.5117 0,-0.707 l -1.1465,-1.1465 h 7.29294 c 2.4852802,0 4.4999982,-2.01471 4.4999982,-4.49999 0,-0.27615 -0.223858,-0.5 -0.499998,-0.5 z M 12.27533,1.08224 C 12.08125,0.954074 11.81729,0.975828 11.64642,1.14669 11.47556,1.31756 11.4538,1.58152 11.58197,1.7756 l 0.06445,0.07812 1.14649,1.14649 H 5.4999398 c -2.48524,0 -4.50004005,2.01472 -4.50004005,4.5 0,0.27614 0.22390005,0.5 0.50000005,0.5 0.2762,0 0.5,-0.22386 0.5,-0.5 0,-1.933 1.567,-3.5 3.50004,-3.5 H 12.79291 l -1.14649,1.14648 -0.06445,0.07813 c -0.12817,0.19408 -0.10641,0.45804 0.06445,0.6289 0.17087,0.17087 0.43483,0.19262 0.62891,0.06446 l 0.07812,-0.06446 2.000003,-2 c 0.195263,-0.19526 0.195263,-0.51177 0,-0.70703 l -2.000003,-2 z"
+     fill="currentColor"
+     id="path1" />
+</svg>
