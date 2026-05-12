@@ -11,4 +11,9 @@ public partial class PlayListContentView : ContentView
 		target_play_list = play_list;
 
     }
+
+    private void CollectionView_ReorderCompleted(object sender, EventArgs e)
+    {
+		((ViewModel.PlayListViewModel)this.BindingContext).ReorderCompletedCommand.Execute(null);
+    }
 }
