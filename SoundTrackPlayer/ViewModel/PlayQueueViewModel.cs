@@ -353,6 +353,8 @@ namespace SoundTrackPlayer.ViewModel
             set
             {
                 _is_multiple_selection_enabled = value;
+                SelectedTrack = null;
+                SelectedTracks = null;
                 OnPropertyChanged(nameof(IsMultipleSelectionEnabled));
                 OnPropertyChanged(nameof(ItemReorderEnabled));
                 OnPropertyChanged(nameof(SelectionMode));
