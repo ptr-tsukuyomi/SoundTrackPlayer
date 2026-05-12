@@ -93,7 +93,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Resources\Images\modified\" />
 	  <Folder Include="Resources\Splash\" />
 	</ItemGroup>
 
