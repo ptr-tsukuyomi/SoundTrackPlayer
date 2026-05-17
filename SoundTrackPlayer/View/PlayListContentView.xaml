@@ -18,18 +18,23 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
-                <RowDefinition />
             </Grid.RowDefinitions>
-            <Label Text="{Binding Path=Name, StringFormat='プレイリスト: {0}'}" Grid.Row="0" FontAttributes="Bold" FontSize="20" VerticalOptions="Center" Margin="10"/>
-            <HorizontalStackLayout Grid.Row="1">
-                <Label Text="複数選択" VerticalOptions="Center" Margin="5" />
-                <Switch IsToggled="{Binding Path=IsMultipleSelectionEnabled}" VerticalOptions="Center" MinimumWidthRequest="0" Margin="5" />
-                <Button Text="登録" Command="{Binding Path=AddCommand}" VerticalOptions="Center" Margin="5" />
-                <Button Text="解除" Command="{Binding Path=DeleteCommand}" VerticalOptions="Center" Margin="5" />
-                <Button Text="クリア" Command="{Binding Path=ClearCommand}" VerticalOptions="Center" Margin="5" />
-                <Button Text="ループ開始位置検出" Command="{Binding Path=FindLoopBeginCommand}" VerticalOptions="Center" Margin="5" />
-            </HorizontalStackLayout>
-            <BoxView HeightRequest="1" Color="Gray" Grid.Row="2" />
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Label Text="{Binding Path=Name, StringFormat='プレイリスト: {0}'}" Grid.Row="0" FontAttributes="Bold" FontSize="20" VerticalOptions="Center" Margin="10" Grid.Column="0" LineBreakMode="TailTruncation"/>
+                <HorizontalStackLayout Grid.Column="1">
+                    <Label Text="複数選択" VerticalOptions="Center" Margin="5" />
+                    <Switch IsToggled="{Binding Path=IsMultipleSelectionEnabled}" VerticalOptions="Center" MinimumWidthRequest="0" Margin="5" />
+                    <Button Text="登録" Command="{Binding Path=AddCommand}" VerticalOptions="Center" Margin="5" />
+                    <Button Text="解除" Command="{Binding Path=DeleteCommand}" VerticalOptions="Center" Margin="5" />
+                    <Button Text="クリア" Command="{Binding Path=ClearCommand}" VerticalOptions="Center" Margin="5" />
+                    <Button Text="ループ開始位置検出" Command="{Binding Path=FindLoopBeginCommand}" VerticalOptions="Center" Margin="5" />
+                </HorizontalStackLayout>
+            </Grid>
+            <BoxView HeightRequest="1" Color="Gray" Grid.Row="1" />
         </Grid>
         <Grid Padding="5" Grid.Row="1">
             <Grid.ColumnDefinitions>
