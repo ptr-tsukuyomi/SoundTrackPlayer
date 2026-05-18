@@ -266,6 +266,12 @@ namespace SoundTrackPlayer.ViewModel
                 DeleteCommand.ChangeCanExecute();
                 FindLoopBeginCommand.ChangeCanExecute();
             });
+
+            PlayListSaveCommand = new Command(() =>
+            {
+                if (_play_list.Source == null) throw new Exception();
+                _play_list.Source.SavePlayList(_play_list);
+            });
         }
 
         //private void Queue_CurrentTrackChanged(object? sender, Track? e)
@@ -436,5 +442,7 @@ namespace SoundTrackPlayer.ViewModel
         public partial object? SelectedTrack { get; set; } = null;
 
         public Command SelectedTracksChangedCommand { get; set; }
+
+        public Command PlayListSaveCommand { get; set; }
     }
 }
