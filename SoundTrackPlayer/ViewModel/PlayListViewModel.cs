@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using SoundTrackPlayer.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-
+using CommunityToolkit.Maui.Storage;
 
 namespace SoundTrackPlayer.ViewModel
 {
@@ -267,9 +267,24 @@ namespace SoundTrackPlayer.ViewModel
                 FindLoopBeginCommand.ChangeCanExecute();
             });
 
-            PlayListSaveCommand = new Command(() =>
+            PlayListSaveCommand = new Command(async () =>
             {
-                if (_play_list.Source == null) throw new Exception();
+                if (_play_list.Source == null)
+                {
+                    var filesave_result = await FileSaver.SaveAsync($"{_play_list.Name}.m3u8", new MemoryStream(0));
+                    if (filesave_result.IsSuccessful)
+                    {
+                        var src = new FileOriginPlayListSource()
+                        {
+                            FilePath = filesave_result.FilePath,
+                            Format = new M3UPlayListFormat()
+                        };
+                        _play_list.Source = src;
+                    } else
+                    {
+                        return;
+                    }
+                }
                 _play_list.Source.SavePlayList(_play_list);
             });
         }

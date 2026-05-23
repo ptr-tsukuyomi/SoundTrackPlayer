@@ -64,6 +64,17 @@ namespace SoundTrackPlayer.ViewModel
             }
         });
 
+        public Command PlayListAddCommand { get; set; } = new Command(() =>
+        {
+            var new_playlist = new PlayList()
+            {
+                Source = null,
+                Name = "新しいプレイリスト",
+                Tracks = new System.Collections.ObjectModel.ObservableCollection<Track>()
+            };
+            StaticResource.PlayLists.Add(new_playlist);
+        });
+
         [ObservableProperty]
         public partial List<FlyoutPageItem> MenuItems { get; set; } = [
             new FlyoutPageItem()
