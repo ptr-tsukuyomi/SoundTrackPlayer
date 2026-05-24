@@ -190,6 +190,7 @@ namespace SoundTrackPlayer.ViewModel
             });
             DeleteCommand = new Command(() =>
             {
+                int min_track_no = Tracks.Count;
                 if (IsMultipleSelectionEnabled)
                 {
                     if (SelectedTracks is null) return;
@@ -199,6 +200,7 @@ namespace SoundTrackPlayer.ViewModel
                     foreach (PlayListTrackViewModel e in targets)
                     {
                         //StaticResource.Player.Queue.Remove(e.Track);
+                        min_track_no = Math.Min(min_track_no, e.TrackNoInPlayList);
                         Tracks.Remove(e);
                         _play_list.Tracks.Remove(e.Track);
                     }
@@ -207,9 +209,11 @@ namespace SoundTrackPlayer.ViewModel
                 {
                     if (SelectedTrack is null) return;
                     //StaticResource.Player.Queue.Remove(((PlayListTrackViewModel)SelectedTrack).Track);
+                    min_track_no = ((PlayListTrackViewModel)SelectedTrack).TrackNoInPlayList;
                     _play_list.Tracks.Remove(((PlayListTrackViewModel)SelectedTrack).Track);
                     Tracks.Remove((PlayListTrackViewModel)SelectedTrack);
                 }
+                CalculateTrackNoInPlayList(begin: min_track_no - 1);
                 _collection_changed_events.Clear();
             }, () =>
             {
@@ -281,6 +285,8 @@ namespace SoundTrackPlayer.ViewModel
                             Format = new M3UPlayListFormat()
                         };
                         _play_list.Source = src;
+                        _play_list.Name = Path.GetFileNameWithoutExtension(src.FilePath);
+                        OnPropertyChanged(nameof(Name));
                     } else
                     {
                         return;
