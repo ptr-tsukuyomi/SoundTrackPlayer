@@ -41,17 +41,26 @@ namespace SoundTrackPlayer.Model
         }
     }
 
-    public interface IPlayListSource
+    public interface IPlayListSource : IEquatable<IPlayListSource>
     {
         public abstract void SavePlayList(PlayList play_list);
         public abstract PlayList? LoadPlayList(IProgress<BackgroundTaskProgress> progress);
         //public abstract string? GetBasePath();
     }
 
-    public class FileOriginPlayListSource : IPlayListSource
+    public class FileOriginPlayListSource : IPlayListSource, IEquatable<IPlayListSource>
     {
         public string FilePath { get; set; } = string.Empty;
         public IPlayListFormat? Format { get; set; } = null;
+
+        public bool Equals(IPlayListSource? other)
+        {
+            if (other is null) return false;
+            if (other is not FileOriginPlayListSource) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            return FilePath == ((FileOriginPlayListSource)other).FilePath;
+        }
 
         public string? GetBasePath()
         {

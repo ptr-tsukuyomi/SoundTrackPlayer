@@ -54,7 +54,7 @@ namespace SoundTrackPlayer.ViewModel
     {
         public Command PlayListUpdateCommand { get; set; } = new Command(() =>
         {
-            StaticResource.PlayLists.Clear();
+            //StaticResource.PlayLists.Clear();
 
             var content_dir = Config.ContentDirectories;
             foreach (var dir in content_dir)

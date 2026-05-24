@@ -22,7 +22,16 @@ namespace SoundTrackPlayer.Model
                         var playlists = PlayList.FindPlayListFromDirectory(directory, progress_reporter);
                         foreach (var e in playlists)
                         {
-                            StaticResource.PlayLists.Add(e);
+                            var same_source_playlist = StaticResource.PlayLists.FirstOrDefault(p => p.Source is not null && p.Source.Equals(e.Source), null!);
+                            if (same_source_playlist is not null)
+                            {
+                                same_source_playlist.Tracks = e.Tracks;
+                                same_source_playlist.Name = e.Name;
+                                same_source_playlist.Source = e.Source;
+                            } else
+                            {
+                                StaticResource.PlayLists.Add(e);
+                            }
                         }
                         ((IProgress<BackgroundTaskProgress>)progress_reporter).Report(new BackgroundTaskProgress()
                         {
