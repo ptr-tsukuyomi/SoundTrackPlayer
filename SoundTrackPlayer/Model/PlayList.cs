@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SoundTrackPlayer.Model
 {
-    public class PlayList
+    public partial class PlayList : ObservableObject
     {
         public static BackgroundTask CreateFindPlayListTask(string directory)
         {
@@ -60,11 +61,14 @@ namespace SoundTrackPlayer.Model
 
         public PlayList() { }
 
-        public IPlayListSource? Source { get; set; } = null;
+        [ObservableProperty]
+        public partial IPlayListSource? Source { get; set; } = null;
 
-        public IList<Track> Tracks { get; set; } = [];
+        [ObservableProperty]
+        public partial IList<Track> Tracks { get; set; } = [];
 
-        public string Name { get; set; } = "New PlayList";
+        [ObservableProperty]
+        public partial string Name { get; set; } = "New PlayList";
 
         public static List<PlayList> FindPlayListFromDirectory(string directory, IProgress<BackgroundTaskProgress> progress)
         {

@@ -74,6 +74,7 @@ namespace SoundTrackPlayer.ViewModel
         public PlayListViewModel(PlayList play_list)
         {
             _play_list = play_list;
+            _play_list.PropertyChanged += PlayList_Changed;
             StaticResource.Player.Queue.CurrentTrackChanged += Queue_CurrentTrackChanged;
             Tracks = new ObservableCollection<PlayListTrackViewModel>(_play_list.Tracks.Select((e, i) => new PlayListTrackViewModel(e, _play_list, i + 1)));
 
@@ -287,6 +288,24 @@ namespace SoundTrackPlayer.ViewModel
                 }
                 _play_list.Source.SavePlayList(_play_list);
             });
+        }
+
+        private void PlayList_Changed(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(PlayList.Name):
+                    OnPropertyChanged(nameof(Name));
+                    break;
+                case nameof(PlayList.Tracks):
+                    Tracks = null;
+                    Tracks = new ObservableCollection<PlayListTrackViewModel>(_play_list.Tracks.Select((e, i) => new PlayListTrackViewModel(e, _play_list, i + 1)));
+                    break;
+                case nameof(PlayList.Source):
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         //private void Queue_CurrentTrackChanged(object? sender, Track? e)
