@@ -34,6 +34,9 @@ public partial class PlayerMainPage : FlyoutPage
                 if (!((IFlyoutPageController)this).ShouldShowSplitMode)
                     IsPresented = false;
             }
+        } else
+        {
+            Content.Children.Clear();
         }
     }
 

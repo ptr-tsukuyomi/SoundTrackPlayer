@@ -50,6 +50,7 @@
                     <Grid Padding="5,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Label Text="{Binding Name}" Grid.Column="0" Margin="15,0" FontAttributes="Bold" VerticalOptions="Center" FontSize="12"/>
                     </Grid>

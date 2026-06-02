@@ -292,7 +292,34 @@ namespace SoundTrackPlayer.ViewModel
                         return;
                     }
                 }
-                _play_list.Source.SavePlayList(_play_list);
+                try
+                {
+                    _play_list.Source.SavePlayList(_play_list);
+                } catch (Exception e)
+                {
+                    await Application.Current!.Windows[0]!.Page!.DisplayAlertAsync("",$"プレイリストの保存に失敗しました。\r\n\r\n[例外]\r\n{e.GetType().Name}\r\n\r\n[メッセージ]\r\n{e.Message}","OK");
+                }
+            });
+
+            PlayListDeleteCommand = new Command(async () =>
+            {
+                var result = await Application.Current!.Windows[0]!.Page!.DisplayActionSheetAsync("プレイリストを削除しますか？", "キャンセル", null, ["プレイヤーから削除", "ファイルも削除"]);
+                if (result is null || result == "キャンセル") return;
+
+                StaticResource.PlayLists.Remove(_play_list);
+
+                if (result == "ファイルも削除"&& _play_list.Source != null)
+                {
+                    try
+                    {
+                        _play_list.Source.DeletePlayList();
+                        _play_list.Tracks.Clear();
+                    }
+                    catch (Exception e)
+                    {
+                        await Application.Current!.Windows[0]!.Page!.DisplayAlertAsync("", $"プレイリストの削除に失敗しました。\r\n\r\n[例外]\r\n{e.GetType().Name}\r\n\r\n[メッセージ]\r\n{e.Message}", "OK");
+                    }
+                }
             });
         }
 
@@ -484,5 +511,7 @@ namespace SoundTrackPlayer.ViewModel
         public Command SelectedTracksChangedCommand { get; set; }
 
         public Command PlayListSaveCommand { get; set; }
+
+        public Command PlayListDeleteCommand { get; set; }
     }
 }
