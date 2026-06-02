@@ -45,6 +45,7 @@ namespace SoundTrackPlayer.Model
     {
         public abstract void SavePlayList(PlayList play_list);
         public abstract PlayList? LoadPlayList(IProgress<BackgroundTaskProgress> progress);
+        public abstract void DeletePlayList();
         //public abstract string? GetBasePath();
     }
 
@@ -52,6 +53,11 @@ namespace SoundTrackPlayer.Model
     {
         public string FilePath { get; set; } = string.Empty;
         public IPlayListFormat? Format { get; set; } = null;
+
+        public void DeletePlayList()
+        {
+            File.Delete(FilePath);
+        }
 
         public bool Equals(IPlayListSource? other)
         {
