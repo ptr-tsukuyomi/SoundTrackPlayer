@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SoundTrackPlayer.Model
 {
-    public class PlayList
+    public partial class PlayList : ObservableObject
     {
         public static BackgroundTask CreateFindPlayListTask(string directory)
         {
@@ -22,7 +23,16 @@ namespace SoundTrackPlayer.Model
                         var playlists = PlayList.FindPlayListFromDirectory(directory, progress_reporter);
                         foreach (var e in playlists)
                         {
-                            StaticResource.PlayLists.Add(e);
+                            var same_source_playlist = StaticResource.PlayLists.FirstOrDefault(p => p.Source is not null && p.Source.Equals(e.Source), null!);
+                            if (same_source_playlist is not null)
+                            {
+                                same_source_playlist.Tracks = e.Tracks;
+                                same_source_playlist.Name = e.Name;
+                                same_source_playlist.Source = e.Source;
+                            } else
+                            {
+                                StaticResource.PlayLists.Add(e);
+                            }
                         }
                         ((IProgress<BackgroundTaskProgress>)progress_reporter).Report(new BackgroundTaskProgress()
                         {
@@ -51,11 +61,14 @@ namespace SoundTrackPlayer.Model
 
         public PlayList() { }
 
-        public IPlayListSource? Source { get; set; } = null;
+        [ObservableProperty]
+        public partial IPlayListSource? Source { get; set; } = null;
 
-        public IList<Track> Tracks { get; set; } = [];
+        [ObservableProperty]
+        public partial IList<Track> Tracks { get; set; } = [];
 
-        public string Name { get; set; } = "New PlayList";
+        [ObservableProperty]
+        public partial string Name { get; set; } = "New PlayList";
 
         public static List<PlayList> FindPlayListFromDirectory(string directory, IProgress<BackgroundTaskProgress> progress)
         {

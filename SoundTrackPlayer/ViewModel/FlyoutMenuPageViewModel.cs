@@ -54,7 +54,7 @@ namespace SoundTrackPlayer.ViewModel
     {
         public Command PlayListUpdateCommand { get; set; } = new Command(() =>
         {
-            StaticResource.PlayLists.Clear();
+            //StaticResource.PlayLists.Clear();
 
             var content_dir = Config.ContentDirectories;
             foreach (var dir in content_dir)
@@ -62,6 +62,17 @@ namespace SoundTrackPlayer.ViewModel
                 var bg_task = PlayList.CreateFindPlayListTask(dir);
                 StaticResource.BackgroundTaskRunner.Enqueue(bg_task);
             }
+        });
+
+        public Command PlayListAddCommand { get; set; } = new Command(() =>
+        {
+            var new_playlist = new PlayList()
+            {
+                Source = null,
+                Name = "新しいプレイリスト",
+                Tracks = new System.Collections.ObjectModel.ObservableCollection<Track>()
+            };
+            StaticResource.PlayLists.Add(new_playlist);
         });
 
         [ObservableProperty]

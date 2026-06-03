@@ -37,7 +37,10 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Label Grid.Column="0" Text="プレイリスト" Margin="10,10" VerticalOptions="Center" />
-            <ImageButton Grid.Column="1" Margin="5,5" Source="{AppThemeBinding Light=update_light.png, Dark=update_dark.png}" Command="{Binding Path=PlayListUpdateCommand}" WidthRequest="30" HeightRequest="30" Aspect="Center" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
+            <HorizontalStackLayout VerticalOptions="Center" Grid.Column="1" Padding="5,5" >
+                <ImageButton Margin="5,0,0,0" Source="{AppThemeBinding Light=plus_light.png, Dark=plus_dark.png}" Command="{Binding Path=PlayListAddCommand}" WidthRequest="30" HeightRequest="30" Aspect="Center" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
+                <ImageButton Margin="5,0,0,0" Source="{AppThemeBinding Light=update_light.png, Dark=update_dark.png}" Command="{Binding Path=PlayListUpdateCommand}" WidthRequest="30" HeightRequest="30" Aspect="Center" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
+            </HorizontalStackLayout>
         </Grid>
         <CollectionView x:Name="PlayListCollectionView"
                         x:FieldModifier="Public"
@@ -47,6 +50,7 @@
                     <Grid Padding="5,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Label Text="{Binding Name}" Grid.Column="0" Margin="15,0" FontAttributes="Bold" VerticalOptions="Center" FontSize="12"/>
                     </Grid>
