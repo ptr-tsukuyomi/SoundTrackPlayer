@@ -78,7 +78,7 @@
                                                         </toolkit:EventToCommandBehavior>
                                                     </Entry.Behaviors>
                                                 </Entry>
-                                                <ImageButton Margin="0,5,0,5" WidthRequest="10" HeightRequest="10" Source="{AppThemeBinding Light=magnifying_glass_light.png, Dark=magnifying_glass_dark.png}" Command="{Binding Path=LoopBeginFindCommand}" />
+                                                <ImageButton Margin="0,5,0,5" WidthRequest="10" HeightRequest="10" Source="{AppThemeBinding Light=crosshair_2_light.png, Dark=crosshair_2_dark.png}" Command="{Binding Path=LoopBeginFindCommand}" />
                                                 <Label Margin="5" Text="～" VerticalOptions="Center" />
                                                 <Entry Margin="5,5,10,5" WidthRequest="130" Text="{Binding Path=TrackLoopEndString, Mode=TwoWay}" VerticalOptions="Center" >
                                                     <Entry.Behaviors>
