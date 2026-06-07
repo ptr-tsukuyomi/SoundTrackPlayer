@@ -140,7 +140,6 @@ namespace SoundTrackPlayer.ViewModel
         public partial int TrackNoInPlayQueue { get; set; }
 
         public IList<LoopModePickerItem> DefaultLoopModePickerItems { get; } = Common.DefaultLoopModePickerItems;
-        public IList<LoopModePickerItem> CurrentLoopModePickerItems { get; } = Common.CurrentLoopModePickerItems;
 
         public LoopModePickerItem TrackDefaultLoopModeItem
         {
