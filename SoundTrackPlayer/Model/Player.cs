@@ -903,7 +903,7 @@ namespace SoundTrackPlayer.Model
                 {
                     case ContinuousPlayMode.Off:
                         State = PlayerState.Stopped;
-                        Queue.SetCurrentTrack(0);
+                        Queue.UnsetCurrentTrack();
                         break;
                     case ContinuousPlayMode.Queue:
                         switch (ShuffleMode) 
@@ -999,13 +999,13 @@ namespace SoundTrackPlayer.Model
             }
             else
             {
-                State = PlayerState.Playing;
                 await pc.Stop();
                 if (Queue.CurrentTrack is null && !Queue.Next() || begin != null && !Queue.GetTracks().Contains(begin))
                 {
                     State = PlayerState.Stopped;
                     throw new PlayableTrackNotFoundException();
                 }
+                State = PlayerState.Playing;
 
                 switch (ShuffleMode)
                 {
@@ -1022,6 +1022,9 @@ namespace SoundTrackPlayer.Model
                 if (begin != null)
                 {
                     Queue.SetCurrentTrack(begin);
+                } else
+                {
+                    Queue.SetCurrentTrack(0);
                 }
 
                 try
