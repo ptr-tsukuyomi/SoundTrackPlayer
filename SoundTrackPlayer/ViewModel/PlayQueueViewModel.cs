@@ -10,7 +10,15 @@ namespace SoundTrackPlayer.ViewModel
         private bool _is_playing;
         public PlayQueueTrackViewModel(Track t, int trackNoInPlayQueue)
         {
+            if (Application.Current is null) throw new Exception();
+
             Track = t;
+
+            Application.Current.RequestedThemeChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(DetailButtonImageSource));
+            };
+
             PlayButtonCommand = new Command(async () =>
             {
                 StaticResource.Player.Queue.SetCurrentTrack(Track);

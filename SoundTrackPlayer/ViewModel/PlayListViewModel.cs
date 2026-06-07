@@ -14,8 +14,16 @@ namespace SoundTrackPlayer.ViewModel
         private PlayList _play_list;
         public PlayListTrackViewModel(Track t, PlayList p, int trackNoInPlayList)
         {
+            if (Application.Current is null) throw new Exception();
+
             Track = t;
             _play_list = p;
+
+            Application.Current.RequestedThemeChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(DetailButtonImageSource));
+            };
+
 
             PlayButtonCommand = new Command(async () =>
             {

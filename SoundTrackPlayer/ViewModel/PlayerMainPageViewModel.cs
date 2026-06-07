@@ -22,6 +22,9 @@ namespace SoundTrackPlayer.ViewModel
             Application.Current.RequestedThemeChanged += (s, e) =>
             {
                 OnPropertyChanged(nameof(PlayPauseButtonImageSource));
+                OnPropertyChanged(nameof(VolumeButtonImageSource));
+                OnPropertyChanged(nameof(ShuffleModeButtonImageSource));
+                OnPropertyChanged(nameof(ContinuousPlayModeButtonImageSource));
             };
 
             StaticResource.Player.PlayerStateChanged += Player_PlayerStateChanged;
@@ -32,13 +35,13 @@ namespace SoundTrackPlayer.ViewModel
 
             SliderDragStartedCommand = new Command(() =>
             {
-                System.Diagnostics.Debug.WriteLine("SliderDragStarted");
+                //System.Diagnostics.Debug.WriteLine("SliderDragStarted");
                 _is_slider_dragging = true;
             });
 
             SliderDragCompletedCommand = new Command(() =>
             {
-                System.Diagnostics.Debug.WriteLine("SliderDragCompleted");
+                //System.Diagnostics.Debug.WriteLine("SliderDragCompleted");
                 Seek(TimeSpan.FromSeconds(CurrentPositionInSeconds));
                 _is_slider_dragging = false;
             });
