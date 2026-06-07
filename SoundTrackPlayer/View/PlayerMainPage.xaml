@@ -50,7 +50,7 @@
                             </toolkit:Expander.Header>
 
                             <VerticalStackLayout>
-                                <Border Margin="10,10,10,10" StrokeThickness="1" Stroke="Gray" >
+                                <!--<Border Margin="10,10,10,10" StrokeThickness="1" Stroke="Gray" >
                                     <VerticalStackLayout>
                                         <Label Margin="5,5,0,0" Text="トラック設定" FontAttributes="Bold" TextDecorations="Underline" />
                                         <Grid>
@@ -114,9 +114,9 @@
                                         </Grid>
 
                                     </VerticalStackLayout>
-                                </Border>
+                                </Border>-->
 
-                                <Border Margin="10,0,10,0" StrokeThickness="1" Stroke="Gray" >
+                                <Border Margin="10,10,10,0" StrokeThickness="1" Stroke="Gray" >
                                     <VerticalStackLayout>
                                         <Label Margin="5,5,0,0" Text="プレイヤーステータス" FontAttributes="Bold" TextDecorations="Underline" />
                                         <Grid>

@@ -31,6 +31,83 @@ namespace SoundTrackPlayer.ViewModel
             });
             IsPlaying = StaticResource.Player.Queue.CurrentTrack == Track;
             TrackNoInPlayQueue = trackNoInPlayQueue;
+
+            TrackLoopBeginEntryUnforcusedCommand = new Command(async () =>
+            {
+                if (Track is not null)
+                {
+                    if (_track_loop_begin_string == "")
+                    {
+                        Track.Config.LoopBegin = null;
+                    }
+                    else if (TimeSpan.TryParse(_track_loop_begin_string, out TimeSpan result))
+                    {
+                        Track.Config.LoopBegin = result;
+                    }
+                }
+                OnPropertyChanged(nameof(TrackLoopBeginString));
+            });
+
+            TrackLoopEndEntryUnforcusedCommand = new Command(async () =>
+            {
+                if (Track is not null)
+                {
+                    if (_track_loop_end_string == "")
+                    {
+                        Track.Config.LoopEnd = null;
+                    }
+                    else if (TimeSpan.TryParse(_track_loop_end_string, out TimeSpan result))
+                    {
+                        Track.Config.LoopEnd = result;
+                    }
+                }
+                OnPropertyChanged(nameof(TrackLoopEndString));
+            });
+
+            LoopBeginFindCommand = new Command(() =>
+            {
+                if (Track is not null)
+                {
+                    var bg_task = LoopPoint.CreateFindLoopBeginTask(Track);
+                    StaticResource.BackgroundTaskRunner.Enqueue(bg_task);
+                }
+            });
+
+            TrackDefaultLoopCountEntryUnforcusedCommand = new Command(() =>
+            {
+                if (Track is not null)
+                {
+                    if (string.IsNullOrEmpty(_default_loop_count_string))
+                    {
+                        Track.Config.LoopCount = null;
+                    }
+                    else if (uint.TryParse(_default_loop_count_string, out uint l))
+                    {
+                        Track.Config.LoopCount = l;
+                    }
+                }
+                OnPropertyChanged(nameof(TrackDefaultLoopCountString));
+            });
+
+            TrackConfigSaveCommand = new Command(async () =>
+            {
+                if (Track is not null && Track.Source is not null)
+                {
+                    try
+                    {
+                        Track.Source.SaveTrackConfig(Track.Config);
+                    }
+                    catch (Exception)
+                    {
+                        await Application.Current!.Windows[0]!.Page!.DisplayAlertAsync(Track.Info.Title ?? "", "トラック設定の保存に失敗しました。", "OK");
+                    }
+                }
+            });
+
+            DetailButtonCommand = new Command(() =>
+            {
+                IsDetailExpaned = !IsDetailExpaned;
+            });
         }
 
         [ObservableProperty]
@@ -61,6 +138,143 @@ namespace SoundTrackPlayer.ViewModel
 
         [ObservableProperty]
         public partial int TrackNoInPlayQueue { get; set; }
+
+        public IList<LoopModePickerItem> DefaultLoopModePickerItems { get; } = Common.DefaultLoopModePickerItems;
+        public IList<LoopModePickerItem> CurrentLoopModePickerItems { get; } = Common.CurrentLoopModePickerItems;
+
+        public LoopModePickerItem TrackDefaultLoopModeItem
+        {
+            get
+            {
+                if (Track is not null)
+                {
+                    var mode = Track.Config.DefaultLoopMode;
+                    var item = Common.DefaultLoopModePickerItems.First(e => e.Mode == mode);
+                    return item;
+                }
+                else
+                {
+                    return Common.DefaultLoopModePickerItems.First(e => e.Mode == LoopMode.Disabled);
+                }
+            }
+            set
+            {
+                if (Track is not null && value is not null)
+                {
+                    Track.Config.DefaultLoopMode = value.Mode;
+                }
+                OnPropertyChanged(nameof(TrackDefaultLoopModeItem));
+            }
+        }
+
+        public string TrackLoopBeginString
+        {
+            get
+            {
+                if (Track?.Config.LoopBegin is null)
+                {
+                    return "未設定";
+                }
+                else
+                {
+                    return Track.Config.LoopBegin.Value.ToString(@"hh\:mm\:ss\.ffffff");
+                }
+            }
+            set
+            {
+                _track_loop_begin_string = value;
+            }
+        }
+        private string _track_loop_begin_string = string.Empty;
+
+        public string TrackLoopEndString
+        {
+            get
+            {
+                if (Track?.Config.LoopEnd is null)
+                {
+                    return "未設定";
+                }
+                else
+                {
+                    return Track.Config.LoopEnd.Value.ToString(@"hh\:mm\:ss\.ffffff");
+                }
+            }
+            set
+            {
+                _track_loop_end_string = value;
+            }
+        }
+        private string _track_loop_end_string = string.Empty;
+
+        public Command TrackLoopBeginEntryUnforcusedCommand { get; set; }
+
+        public Command TrackLoopEndEntryUnforcusedCommand { get; set; }
+
+        public Command LoopBeginFindCommand { get; set; }
+
+        public string TrackDefaultLoopCountString
+        {
+            get
+            {
+                if (Track is not null)
+                {
+                    if (Track.Config.LoopCount is null)
+                    {
+                        return "未設定";
+                    }
+                    else
+                    {
+                        return Track.Config.LoopCount.Value.ToString();
+                    }
+                }
+                else
+                {
+                    return "-";
+                }
+            }
+            set
+            {
+                _default_loop_count_string = value;
+            }
+        }
+        private string _default_loop_count_string = string.Empty;
+
+        public Command TrackDefaultLoopCountEntryUnforcusedCommand { get; set; }
+
+        public Command TrackConfigSaveCommand { get; set; }
+
+        public bool IsDetailExpaned
+        {
+            get
+            {
+                return _is_detail_expanded;
+            }
+            set
+            {
+                _is_detail_expanded = value;
+                OnPropertyChanged(nameof(IsDetailExpaned));
+                OnPropertyChanged(nameof(DetailButtonImageSource));
+            }
+        }
+        bool _is_detail_expanded = false;
+
+        public ImageSource DetailButtonImageSource
+        {
+            get
+            {
+                if (Application.Current is null) throw new Exception();
+                string theme = Application.Current.RequestedTheme == AppTheme.Dark ? "dark" : "light";
+
+                return IsDetailExpaned switch
+                {
+                    true => ImageSource.FromFile($"double_arrow_up_{theme}.png"),
+                    false => ImageSource.FromFile($"double_arrow_down_{theme}.png")
+                };
+            }
+        }
+
+        public Command DetailButtonCommand { get; set; }
     }
 
     public partial class PlayQueueViewModel : ObservableObject

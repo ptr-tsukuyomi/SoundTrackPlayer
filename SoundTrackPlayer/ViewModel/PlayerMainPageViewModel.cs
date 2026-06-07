@@ -11,12 +11,6 @@ using System.Threading.Tasks;
 
 namespace SoundTrackPlayer.ViewModel
 {
-    public class LoopModePickerItem
-    {
-        public string Name { get; set; } = string.Empty;
-        public LoopMode Mode { get; set; } = LoopMode.Disabled;
-    }
-
     public partial class PlayerMainPageViewModel : ObservableObject
     {
         #region constructor
@@ -236,7 +230,7 @@ namespace SoundTrackPlayer.ViewModel
         private void Player_TrackChanged(object? sender, Track? e)
         {
             Track = StaticResource.Player.Queue.CurrentTrack;
-            if(Track is not null)
+            if (Track is not null)
             {
                 Track.PropertyChanged += Track_PropertyChanged;
             }
@@ -360,8 +354,8 @@ namespace SoundTrackPlayer.ViewModel
         }
 
         public double Volume
-        { 
-            get 
+        {
+            get
             {
                 return IsMuted ? 0.0 : _volume;
             }
@@ -543,21 +537,8 @@ namespace SoundTrackPlayer.ViewModel
         }
         private string _default_loop_count_string = string.Empty;
 
-        public IList<LoopModePickerItem> DefaultLoopModePickerItems { get; set; } = new List<LoopModePickerItem>()
-        {
-            new() { Name = "未設定", Mode = LoopMode.None },
-            new() { Name = "有限ループ", Mode = LoopMode.Limited },
-            new() { Name = "無限ループ", Mode = LoopMode.Unlimited },
-            new() { Name = "ループ無効", Mode = LoopMode.Disabled }
-        };
-
-        public IList<LoopModePickerItem> CurrentLoopModePickerItems { get; set; } = new List<LoopModePickerItem>()
-        {
-            new() { Name = "有限ループ", Mode = LoopMode.Limited },
-            new() { Name = "無限ループ", Mode = LoopMode.Unlimited },
-            new() { Name = "ループ無効", Mode = LoopMode.Disabled }
-        };
-
+        public IList<LoopModePickerItem> DefaultLoopModePickerItems { get; } = Common.DefaultLoopModePickerItems;
+        public IList<LoopModePickerItem> CurrentLoopModePickerItems { get; } = Common.CurrentLoopModePickerItems;
 
         public LoopModePickerItem TrackDefaultLoopModeItem
         {
@@ -566,11 +547,11 @@ namespace SoundTrackPlayer.ViewModel
                 if (Track is not null)
                 {
                     var mode = Track.Config.DefaultLoopMode;
-                    var item = DefaultLoopModePickerItems.First(e => e.Mode == mode);
+                    var item = Common.DefaultLoopModePickerItems.First(e => e.Mode == mode);
                     return item;
                 } else
                 {
-                    return DefaultLoopModePickerItems.First(e => e.Mode == LoopMode.Disabled);
+                    return Common.DefaultLoopModePickerItems.First(e => e.Mode == LoopMode.Disabled);
                 }
             }
             set
@@ -592,7 +573,7 @@ namespace SoundTrackPlayer.ViewModel
                 {
                     mode = LoopMode.Disabled;
                 }
-                var item = CurrentLoopModePickerItems.First(e => e.Mode == mode);
+                var item = Common.CurrentLoopModePickerItems.First(e => e.Mode == mode);
                 return item;
             }
             set

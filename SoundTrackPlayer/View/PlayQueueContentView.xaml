@@ -50,6 +50,7 @@
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="50" />
             </Grid.ColumnDefinitions>
             <Label Text="" Grid.Column="0" VerticalOptions="Center" Margin="5"/>
             <Label Text="No" Grid.Column="1" VerticalOptions="Center" Margin="5,0,5,0"/>
@@ -58,6 +59,7 @@
             <Label Text="ループ開始位置" Grid.Column="4" VerticalOptions="Center" Margin="5,0,5,0"/>
             <Label Text="ループ終了位置" Grid.Column="5" VerticalOptions="Center" Margin="5,0,5,0"/>
             <Label Text="ループ区間再生回数" Grid.Column="6" VerticalOptions="Center" Margin="5,0,5,0"/>
+            <Label Text="" Grid.Column="7" VerticalOptions="Center" Margin="5"/>
         </Grid>
         <CollectionView SelectionChangedCommand="{Binding Path=SelectedTracksChangedCommand}" SelectedItem="{Binding Path=SelectedTrack}" SelectedItems="{Binding Path=SelectedTracks, Mode=TwoWay}" SelectionMode="{Binding Path=SelectionMode}" ItemsSource="{Binding Path=Tracks}" CanReorderItems="{Binding Path=ItemReorderEnabled}" Grid.Row="2" Margin="0,5,0,0">
             <CollectionView.Behaviors>
@@ -69,24 +71,100 @@
             </CollectionView.Behaviors>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50" />
-                            <ColumnDefinition Width="30" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="130" />
-                            <ColumnDefinition Width="130" />
-                            <ColumnDefinition Width="70" />
-                        </Grid.ColumnDefinitions>
-                        <ImageButton Source="{AppThemeBinding Light=play_light.png, Dark=play_dark.png}" Command="{Binding Path=PlayButtonCommand}" Grid.Column="0" WidthRequest="30" HeightRequest="30" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
-                        <Label Text="{Binding Path=TrackNoInPlayQueue}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Info.Title}" LineBreakMode="TailTruncation" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="2" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.DefaultLoopMode, Converter={StaticResource loop_mode_to_string_converter}}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="3" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.LoopBegin, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="4" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.LoopEnd, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="5" VerticalOptions="Center" Margin="5"/>
-                        <Label Text="{Binding Path=Track.Config.LoopCount, TargetNullValue='未設定'}" HorizontalOptions="End" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="6" VerticalOptions="Center" Margin="5"/>
-                    </Grid>
+                    <VerticalStackLayout x:Name="TrackItem">
+                        <Grid Padding="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="30" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="50" />
+                            </Grid.ColumnDefinitions>
+                            <ImageButton Source="{AppThemeBinding Light=play_light.png, Dark=play_dark.png}" Command="{Binding Path=PlayButtonCommand}" Grid.Column="0" WidthRequest="30" HeightRequest="30" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
+                            <Label Text="{Binding Path=TrackNoInPlayQueue}" HorizontalOptions="End" Grid.Column="1" VerticalOptions="Center" Margin="5"/>
+                            <Label Text="{Binding Path=Track.Info.Title}" LineBreakMode="TailTruncation" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="2" VerticalOptions="Center" Margin="5"/>
+                            <Label Text="{Binding Path=Track.Config.DefaultLoopMode, Converter={StaticResource loop_mode_to_string_converter}}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="3" VerticalOptions="Center" Margin="5"/>
+                            <Label Text="{Binding Path=Track.Config.LoopBegin, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="4" VerticalOptions="Center" Margin="5"/>
+                            <Label Text="{Binding Path=Track.Config.LoopEnd, StringFormat='{0:hh}:{0:mm}:{0:ss}.{0:ffffff}', TargetNullValue='未設定'}" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="5" VerticalOptions="Center" Margin="5"/>
+                            <Label Text="{Binding Path=Track.Config.LoopCount, TargetNullValue='未設定'}" HorizontalOptions="End" FontAttributes="{Binding Path=FontAttributes}" Grid.Column="6" VerticalOptions="Center" Margin="5"/>
+                            <ImageButton Source="{Binding DetailButtonImageSource}" Command="{Binding Path=DetailButtonCommand}" Grid.Column="7" WidthRequest="30" HeightRequest="30" MinimumHeightRequest="0" MinimumWidthRequest="0"/>
+                        </Grid>
+                        <toolkit:Expander Direction="Down" IsExpanded="{Binding IsDetailExpaned}">
+                            <Grid Padding="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Margin="10,0,10,10" StrokeThickness="1" Stroke="Gray" Grid.Column="1">
+                                    <VerticalStackLayout>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <HorizontalStackLayout VerticalOptions="Center" Margin="5,0,0,0" Grid.Column="0">
+                                                <Label Margin="5" Text="ループモード" VerticalOptions="Center" />
+                                                <Picker Margin="5,5,10,5" WidthRequest="120" SelectedItem="{Binding Path=TrackDefaultLoopModeItem, Mode=TwoWay}" VerticalOptions="Center"
+                                                ItemsSource="{Binding Path=DefaultLoopModePickerItems}" ItemDisplayBinding="{Binding Path=Name}">
+                                                </Picker>
+                                                <Label Margin="5" Text="ループ区間" VerticalOptions="Center" />
+                                                <Entry Margin="5,5,5,5" WidthRequest="130" Text="{Binding Path=TrackLoopBeginString, Mode=TwoWay}" VerticalOptions="Center" >
+                                                    <Entry.Behaviors>
+                                                        <toolkit:EventToCommandBehavior 
+                                                        EventName="Unfocused" 
+                                                        Command="{Binding Path=TrackLoopBeginEntryUnforcusedCommand}" 
+                                                        BindingContext="{Binding Path=BindingContext, Source={x:Reference TrackItem}, x:DataType=VerticalStackLayout}">
+                                                        </toolkit:EventToCommandBehavior>
+                                                        <toolkit:EventToCommandBehavior 
+                                                        EventName="Completed" 
+                                                        Command="{Binding Path=TrackLoopBeginEntryUnforcusedCommand}" 
+                                                        BindingContext="{Binding Path=BindingContext, Source={x:Reference TrackItem}, x:DataType=VerticalStackLayout}">
+                                                        </toolkit:EventToCommandBehavior>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <ImageButton Margin="0,5,0,5" WidthRequest="10" HeightRequest="10" Source="{AppThemeBinding Light=crosshair_2_light.png, Dark=crosshair_2_dark.png}" Command="{Binding Path=LoopBeginFindCommand}" />
+                                                <Label Margin="5" Text="～" VerticalOptions="Center" />
+                                                <Entry Margin="5,5,10,5" WidthRequest="130" Text="{Binding Path=TrackLoopEndString, Mode=TwoWay}" VerticalOptions="Center" >
+                                                    <Entry.Behaviors>
+                                                        <toolkit:EventToCommandBehavior 
+                                                            EventName="Unfocused" 
+                                                            Command="{Binding Path=TrackLoopEndEntryUnforcusedCommand}" 
+                                                            BindingContext="{Binding Path=BindingContext, Source={x:Reference TrackItem}, x:DataType=VerticalStackLayout}">
+                                                        </toolkit:EventToCommandBehavior>
+                                                        <toolkit:EventToCommandBehavior 
+                                                            EventName="Completed" 
+                                                            Command="{Binding Path=TrackLoopEndEntryUnforcusedCommand}" 
+                                                            BindingContext="{Binding Path=BindingContext, Source={x:Reference TrackItem}, x:DataType=VerticalStackLayout}">
+                                                        </toolkit:EventToCommandBehavior>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <Label Margin="5" Text="ループ区間再生回数" VerticalOptions="Center" />
+                                                <Entry Margin="5,5,10,5" WidthRequest="60" Text="{Binding Path=TrackDefaultLoopCountString, Mode=TwoWay}" VerticalOptions="Center" HorizontalTextAlignment="End">
+                                                    <Entry.Behaviors>
+                                                        <toolkit:EventToCommandBehavior 
+                                                        EventName="Unfocused" 
+                                                        Command="{Binding Path=TrackDefaultLoopCountEntryUnforcusedCommand}" 
+                                                        BindingContext="{Binding Path=BindingContext, Source={x:Reference TrackItem}, x:DataType=VerticalStackLayout}">
+                                                        </toolkit:EventToCommandBehavior>
+                                                        <toolkit:EventToCommandBehavior 
+                                                        EventName="Completed" 
+                                                        Command="{Binding Path=TrackDefaultLoopCountEntryUnforcusedCommand}" 
+                                                        BindingContext="{Binding Path=BindingContext, Source={x:Reference TrackItem}, x:DataType=VerticalStackLayout}">
+                                                        </toolkit:EventToCommandBehavior>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                            </HorizontalStackLayout>
+                                            <ImageButton Margin="5" Grid.Column="1" WidthRequest="30" HeightRequest="30" MinimumHeightRequest="0" MinimumWidthRequest="0" Source="{AppThemeBinding Light=save_light.png,Dark=save_dark.png}" Command="{Binding Path=TrackConfigSaveCommand}" VerticalOptions="Center" />
+                                        </Grid>
+
+                                    </VerticalStackLayout>
+                                </Border>
+                            </Grid>
+                        </toolkit:Expander>
+                    </VerticalStackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
