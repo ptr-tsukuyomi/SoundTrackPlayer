@@ -11,12 +11,6 @@ using System.Threading.Tasks;
 
 namespace SoundTrackPlayer.ViewModel
 {
-    public class LoopModePickerItem
-    {
-        public string Name { get; set; } = string.Empty;
-        public LoopMode Mode { get; set; } = LoopMode.Disabled;
-    }
-
     public partial class PlayerMainPageViewModel : ObservableObject
     {
         #region constructor
@@ -49,38 +43,6 @@ namespace SoundTrackPlayer.ViewModel
                 _is_slider_dragging = false;
             });
 
-            TrackLoopBeginEntryUnforcusedCommand = new Command(async () =>
-            {
-                if (Track is not null)
-                {
-                    if (_track_loop_begin_string == "")
-                    {
-                        Track.Config.LoopBegin = null;
-                    }
-                    else if (TimeSpan.TryParse(_track_loop_begin_string, out TimeSpan result))
-                    {
-                        Track.Config.LoopBegin = result;
-                    }
-                }
-                OnPropertyChanged(nameof(TrackLoopBeginString));
-            });
-
-            TrackLoopEndEntryUnforcusedCommand = new Command(async () =>
-            {
-                if (Track is not null)
-                {
-                    if (_track_loop_end_string == "")
-                    {
-                        Track.Config.LoopEnd = null;
-                    }
-                    else if (TimeSpan.TryParse(_track_loop_end_string, out TimeSpan result))
-                    {
-                        Track.Config.LoopEnd = result;
-                    }
-                }
-                OnPropertyChanged(nameof(TrackLoopEndString));
-            });
-
             LastLoopExecutionEntryForcusedCommand = new Command(() =>
             {
                 _is_last_loop_execution_entry_focused = true;
@@ -101,22 +63,6 @@ namespace SoundTrackPlayer.ViewModel
                 }
                 _is_last_loop_execution_entry_focused = false;
                 OnPropertyChanged(nameof(LastLoopExecutionString));
-            });
-
-            TrackDefaultLoopCountEntryUnforcusedCommand = new Command(() =>
-            {
-                if (Track is not null)
-                {
-                    if (string.IsNullOrEmpty(_default_loop_count_string))
-                    {
-                        Track.Config.LoopCount = null;
-                    }
-                    else if (uint.TryParse(_default_loop_count_string, out uint l))
-                    {
-                        Track.Config.LoopCount = l;
-                    }
-                }
-                OnPropertyChanged(nameof(TrackDefaultLoopCountString));
             });
 
             CurrentLoopModePickerSelectedIndexChangedCommand = new Command(async () =>
@@ -156,33 +102,6 @@ namespace SoundTrackPlayer.ViewModel
                     }
                 }
                 OnPropertyChanged(nameof(CurrentLoopEndString));
-            });
-
-            TrackConfigSaveCommand = new Command(async () =>
-            {
-                if (Track is not null && Track.Source is not null)
-                {
-                    try
-                    {
-                        Track.Source.SaveTrackConfig(Track.Config);
-                    }
-                    catch (Exception)
-                    {
-                        if (Page is not null)
-                        {
-                            await Page.DisplayAlertAsync(Track.Info.Title ?? "", "トラック設定の保存に失敗しました。", "OK");
-                        }
-                    }
-                }
-            });
-
-            LoopBeginFindCommand = new Command(() =>
-            {
-                if (Track is not null)
-                {
-                    var bg_task = LoopPoint.CreateFindLoopBeginTask(Track);
-                    StaticResource.BackgroundTaskRunner.Enqueue(bg_task);
-                }
             });
 
             VolumeButtonClickCommand = new Command(() =>
@@ -236,7 +155,7 @@ namespace SoundTrackPlayer.ViewModel
         private void Player_TrackChanged(object? sender, Track? e)
         {
             Track = StaticResource.Player.Queue.CurrentTrack;
-            if(Track is not null)
+            if (Track is not null)
             {
                 Track.PropertyChanged += Track_PropertyChanged;
             }
@@ -256,11 +175,6 @@ namespace SoundTrackPlayer.ViewModel
 
         private void RefreshTrackView()
         {
-            OnPropertyChanged(nameof(TrackLoopBeginString));
-            OnPropertyChanged(nameof(TrackLoopEndString));
-            OnPropertyChanged(nameof(TrackDefaultLoopCountString));
-            OnPropertyChanged(nameof(TrackDefaultLoopModeItem));
-
             if (Track is not null && Track.Info.Length is TimeSpan t && StaticResource.Player.State != PlayerState.Stopped)
             {
                 TrackLengthInSeconds = t.TotalSeconds;
@@ -360,8 +274,8 @@ namespace SoundTrackPlayer.ViewModel
         }
 
         public double Volume
-        { 
-            get 
+        {
+            get
             {
                 return IsMuted ? 0.0 : _volume;
             }
@@ -455,46 +369,6 @@ namespace SoundTrackPlayer.ViewModel
         [ObservableProperty]
         public partial double TrackLengthInSeconds { get; set; } = 0;
 
-
-        public string TrackLoopBeginString
-        {
-            get
-            {
-                if (Track?.Config.LoopBegin is null)
-                {
-                    return "未設定";
-                } else
-                {
-                    return Track.Config.LoopBegin.Value.ToString(@"hh\:mm\:ss\.ffffff");
-                }
-            }
-            set
-            {
-                _track_loop_begin_string = value;
-            }
-        }
-        private string _track_loop_begin_string = string.Empty;
-
-        public string TrackLoopEndString
-        {
-            get
-            {
-                if (Track?.Config.LoopEnd is null)
-                {
-                    return "未設定";
-                }
-                else
-                {
-                    return Track.Config.LoopEnd.Value.ToString(@"hh\:mm\:ss\.ffffff");
-                }
-            }
-            set
-            {
-                _track_loop_end_string = value;
-            }
-        }
-        private string _track_loop_end_string = string.Empty;
-
         public string LastLoopExecutionString
         {
             get
@@ -518,70 +392,7 @@ namespace SoundTrackPlayer.ViewModel
         }
         private string _last_loop_execution_string = string.Empty;
 
-        public string TrackDefaultLoopCountString
-        {
-            get
-            {
-                if (Track is not null)
-                {
-                    if (Track.Config.LoopCount is null)
-                    {
-                        return "未設定";
-                    } else
-                    {
-                        return Track.Config.LoopCount.Value.ToString();
-                    }
-                } else
-                {
-                    return "-";
-                }
-            }
-            set
-            {
-                _default_loop_count_string = value;
-            }
-        }
-        private string _default_loop_count_string = string.Empty;
-
-        public IList<LoopModePickerItem> DefaultLoopModePickerItems { get; set; } = new List<LoopModePickerItem>()
-        {
-            new() { Name = "未設定", Mode = LoopMode.None },
-            new() { Name = "有限ループ", Mode = LoopMode.Limited },
-            new() { Name = "無限ループ", Mode = LoopMode.Unlimited },
-            new() { Name = "ループ無効", Mode = LoopMode.Disabled }
-        };
-
-        public IList<LoopModePickerItem> CurrentLoopModePickerItems { get; set; } = new List<LoopModePickerItem>()
-        {
-            new() { Name = "有限ループ", Mode = LoopMode.Limited },
-            new() { Name = "無限ループ", Mode = LoopMode.Unlimited },
-            new() { Name = "ループ無効", Mode = LoopMode.Disabled }
-        };
-
-
-        public LoopModePickerItem TrackDefaultLoopModeItem
-        {
-            get
-            {
-                if (Track is not null)
-                {
-                    var mode = Track.Config.DefaultLoopMode;
-                    var item = DefaultLoopModePickerItems.First(e => e.Mode == mode);
-                    return item;
-                } else
-                {
-                    return DefaultLoopModePickerItems.First(e => e.Mode == LoopMode.Disabled);
-                }
-            }
-            set
-            {
-                if (Track is not null)
-                {
-                    Track.Config.DefaultLoopMode = value.Mode;
-                }
-                OnPropertyChanged(nameof(TrackDefaultLoopModeItem));
-            }
-        }
+        public IList<LoopModePickerItem> CurrentLoopModePickerItems { get; } = Common.CurrentLoopModePickerItems;
 
         public LoopModePickerItem CurrentLoopModeItem
         {
@@ -592,7 +403,7 @@ namespace SoundTrackPlayer.ViewModel
                 {
                     mode = LoopMode.Disabled;
                 }
-                var item = CurrentLoopModePickerItems.First(e => e.Mode == mode);
+                var item = Common.CurrentLoopModePickerItems.First(e => e.Mode == mode);
                 return item;
             }
             set
@@ -701,16 +512,10 @@ namespace SoundTrackPlayer.ViewModel
 
         public Command SliderDragCompletedCommand { get; set; }
 
-        public Command TrackLoopBeginEntryUnforcusedCommand { get; set; }
-
-        public Command TrackLoopEndEntryUnforcusedCommand { get; set; }
-
         public Command LastLoopExecutionEntryForcusedCommand { get; set; }
         public Command LastLoopExecutionEntryUnforcusedCommand { get; set; }
 
         private bool _is_last_loop_execution_entry_focused = false;
-
-        public Command TrackDefaultLoopCountEntryUnforcusedCommand { get; set; }
 
         public Command CurrentLoopModePickerSelectedIndexChangedCommand { get; set; }
 
@@ -718,10 +523,6 @@ namespace SoundTrackPlayer.ViewModel
         public Command CurrentLoopBeginEntryUnforcusedCommand { get; set; }
 
         public Command CurrentLoopEndEntryUnforcusedCommand { get; set; }
-
-        public Command TrackConfigSaveCommand { get; set; }
-
-        public Command LoopBeginFindCommand { get; set; }
 
         public Command VolumeButtonClickCommand { get; set; }
 
