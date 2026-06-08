@@ -216,7 +216,7 @@ namespace SoundTrackPlayer.Model
             if (target_end_sample > mixed_data.Length) target_end_sample = mixed_data.Length - 1;
             if (compare_samples <= 0) throw new Exception();
             if (compare_samples > mixed_data.Length) throw new Exception();
-            if (loop_end_sample + compare_samples >= mixed_data.Length) loop_end_sample = mixed_data.Length - compare_samples;
+            if (loop_end_sample + compare_samples >= mixed_data.Length) loop_end_sample = mixed_data.Length - 1 - compare_samples;
             if (loop_end_sample < 0) throw new Exception();
 
             if (target_begin_sample >= target_end_sample) throw new Exception();
