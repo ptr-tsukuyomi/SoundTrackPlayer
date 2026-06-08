@@ -19,6 +19,11 @@ namespace SoundTrackPlayer.ViewModel
             Track = t;
             _play_list = p;
 
+            Track.PropertyChanged += (o, e) =>
+            {
+                RefreshTrackView();
+            };
+
             Application.Current.RequestedThemeChanged += (s, e) =>
             {
                 OnPropertyChanged(nameof(DetailButtonImageSource));
@@ -113,6 +118,15 @@ namespace SoundTrackPlayer.ViewModel
                 IsDetailExpaned = !IsDetailExpaned;
             });
         }
+
+        private void RefreshTrackView()
+        {
+            OnPropertyChanged(nameof(TrackDefaultLoopModeItem));
+            OnPropertyChanged(nameof(TrackLoopBeginString));
+            OnPropertyChanged(nameof(TrackLoopEndString));
+            OnPropertyChanged(nameof(TrackDefaultLoopCountString));
+        }
+
 
         [ObservableProperty]
         public partial FontAttributes FontAttributes { get; set; } = FontAttributes.None;
