@@ -56,7 +56,7 @@ namespace SoundTrackPlayer.Model
                     //var result = LoopPoint.FindLoopBeginTimeSpan(t, t.Config.LoopEnd.Value, inner_progress_reporter, 44100 * 3);
                     var compare_duration = Config.FindLoopPointCompareDuration;
                     var target_begin = t.Config.LoopBegin == null ? TimeSpan.Zero : t.Config.LoopBegin.Value - Config.FindLoopPointTargetDuration_WithLoopBegin / 2;
-                    var target_end = t.Config.LoopBegin == null ? Config.FindLoopPointTargetDuration_WithoutLoopBegin : t.Config.LoopBegin.Value + Config.FindLoopPointTargetDuration_WithLoopBegin * 1.5;
+                    var target_end = t.Config.LoopBegin == null ? Config.FindLoopPointTargetDuration_WithoutLoopBegin : t.Config.LoopBegin.Value + compare_duration + Config.FindLoopPointTargetDuration_WithLoopBegin / 2;
                     var result = LoopPoint.FindLoopBeginSample(t, target_begin, target_end, t.Config.LoopEnd.Value, compare_duration, inner_progress_reporter);
 
                     if (result.Any())
@@ -170,17 +170,18 @@ namespace SoundTrackPlayer.Model
             try
             {
                 engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
-                src = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, stream);
+                //src = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, stream);
+                src = new SoundFlow.Providers.StreamDataProvider(engine, stream);
                 if (src.FormatInfo is null) return [];
 
                 whole_data = ReadAllSamples(src);
                 mixed_data = MixChannel(whole_data, src.FormatInfo.ChannelCount);
                 whole_data = null;
 
-                var result = FindLoopBeginSample(mixed_data, src.FormatInfo.SampleRate, target_begin, target_end, loop_end, compare_duration, progress).Select(
+                var result = FindLoopBeginSample(mixed_data, src.SampleRate, target_begin, target_end, loop_end, compare_duration, progress).Select(
                     (e) =>
                     {
-                        return TimeSpan.FromSeconds((double)e / src.FormatInfo.SampleRate);
+                        return TimeSpan.FromSeconds((double)e / src.SampleRate);
                     });
                 return result;
             }
