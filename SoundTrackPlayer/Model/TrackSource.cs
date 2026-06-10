@@ -14,11 +14,14 @@ namespace SoundTrackPlayer.Model
         //public abstract Stream? GetStream();
         public abstract Stream Open();
         //public abstract void Close();
+        public abstract string Name { get; }
     }
 
     public class FileOriginTrackSource : ITrackSource
     {
         public string FilePath { get; set; } = "";
+        public string Name { get => Path.GetFileName(FilePath); }
+
         //public Stream? Stream { get; set; } = null;
 
         static private TrackConfig? LoadTrackConfigFromFile(string info_file_path)

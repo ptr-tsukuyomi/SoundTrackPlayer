@@ -96,5 +96,55 @@ namespace SoundTrackPlayer.Model
         {
             OnPropertyChanged(nameof(Info));
         }
+
+        public void LoadMetadata()
+        {
+            if (Source is null) throw new TrackDataLoadException();
+
+
+            var stream = Source.Open();
+            if (stream is null) throw new TrackDataLoadException();
+
+            var memory_stream = new MemoryStream((int)stream.Length); // MP3 の場合、なぜか new StreamDataProvider() から返ってこなくなる。MemoryStream にコピーすると正常に動作する。なぜ？
+            stream.CopyTo(memory_stream);
+            stream.Close();
+            stream = null;
+
+            var result = TagLibSharp2.Core.MediaFile.ReadFromData(memory_stream.ToArray());
+
+            Info = new TrackInfo
+            {
+                Title = Path.GetFileName(Source.Name)
+            };
+
+            if (result.IsSuccess && result.Tag is not null)
+            {
+                if (result.Tag.Title is string s)
+                {
+                    Info.Title = s;
+                }
+                if (result.Tag.Track is uint t)
+                {
+                    Info.No = t;
+                }
+            }
+
+
+            var engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
+            var audio_format = SoundFlow.Structs.AudioFormat.Cd;
+
+            SoundFlow.Providers.StreamDataProvider p = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, memory_stream);
+
+            if (p.FormatInfo is not null)
+            {
+                Info.Length = p.FormatInfo.Duration;
+            } else
+            {
+                throw new TrackDataLoadException();
+            }
+
+            p.Dispose();
+            memory_stream.Close();
+        }
     }
 }
