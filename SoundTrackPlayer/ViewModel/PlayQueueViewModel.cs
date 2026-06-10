@@ -26,16 +26,17 @@ namespace SoundTrackPlayer.ViewModel
 
             PlayButtonCommand = new Command(async () =>
             {
-                StaticResource.Player.Queue.SetCurrentTrack(Track);
                 switch (StaticResource.Player.State)
                 {
                     case PlayerState.Playing:
+                        StaticResource.Player.Queue.SetCurrentTrack(Track);
                         break;
                     case PlayerState.Paused:
+                        StaticResource.Player.Queue.SetCurrentTrack(Track);
                         await StaticResource.Player.Play();
                         break;
                     case PlayerState.Stopped:
-                        await StaticResource.Player.Play();
+                        await StaticResource.Player.Play(Track);
                         break;
                 }
             }, () =>
