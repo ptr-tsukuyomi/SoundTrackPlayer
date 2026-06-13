@@ -14,6 +14,7 @@ namespace SoundTrackPlayer
         {
             var w = new Window(new SoundTrackPlayer.View.PlayerMainPage()) { Height = 800, Width = 1280 };
             w.Destroying += Window_Destroying;
+            StaticResource.UIThreadDispatcher = Microsoft.Maui.Dispatching.Dispatcher.GetForCurrentThread();
             return w;
         }
 

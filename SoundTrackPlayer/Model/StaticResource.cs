@@ -18,5 +18,7 @@ namespace SoundTrackPlayer.Model
         public static ObservableCollection<PlayList> PlayLists { get; set; } = [];
 
         public static BackgroundTaskRunner BackgroundTaskRunner { get; set; } = new();
+
+        public static IDispatcher? UIThreadDispatcher { get; set; } = null;
     }
 }

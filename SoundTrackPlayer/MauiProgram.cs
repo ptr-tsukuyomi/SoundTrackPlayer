@@ -62,6 +62,10 @@ namespace SoundTrackPlayer
                                     break;
                                 }
                         }
+                    }).OnWindowCreated(window =>
+                    {
+                        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                        WinUI.MediaControl.Initialize(hWnd);
                     }));
 #endif
                 });

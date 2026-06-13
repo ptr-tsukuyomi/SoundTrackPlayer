@@ -239,9 +239,6 @@ namespace SoundTrackPlayer.Model
 
         public PlayerCore()
         {
-            var d = Dispatcher.GetForCurrentThread();
-            if (d is null) throw new Exception();
-            _dispatcher = d;
         }
 
         ~PlayerCore()
@@ -355,8 +352,6 @@ namespace SoundTrackPlayer.Model
             }
         }
         private uint _last_loop_execute = 0;
-
-        private IDispatcher _dispatcher;
 
         public TimeSpan Position
         {
@@ -554,7 +549,7 @@ namespace SoundTrackPlayer.Model
 
         private void PlayBackEnded(object? sender, EventArgs e)
         {
-            _dispatcher.Dispatch(async () =>
+            StaticResource.UIThreadDispatcher?.Dispatch(async () =>
             {
                 await Stop();
                 PlaybackCompleted?.Invoke(this, new EventArgs());
