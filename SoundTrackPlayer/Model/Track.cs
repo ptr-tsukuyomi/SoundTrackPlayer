@@ -101,50 +101,61 @@ namespace SoundTrackPlayer.Model
         {
             if (Source is null) throw new TrackDataLoadException();
 
-
-            var stream = Source.Open();
-            if (stream is null) throw new TrackDataLoadException();
-
-            var memory_stream = new MemoryStream((int)stream.Length); // MP3 の場合、なぜか new StreamDataProvider() から返ってこなくなる。MemoryStream にコピーすると正常に動作する。なぜ？
-            stream.CopyTo(memory_stream);
-            stream.Close();
-            stream = null;
-
-            var result = TagLibSharp2.Core.MediaFile.ReadFromData(memory_stream.ToArray());
-
             Info = new TrackInfo
             {
                 Title = Path.GetFileName(Source.Name)
             };
 
-            if (result.IsSuccess && result.Tag is not null)
+            Stream? stream = null;
+            MemoryStream? memory_stream = null;
+            SoundFlow.Providers.StreamDataProvider? p = null;
+
+            try
             {
-                if (result.Tag.Title is string s)
+                stream = Source.Open();
+                if (stream is null) throw new TrackDataLoadException();
+
+                memory_stream = new MemoryStream((int)stream.Length); // MP3 の場合、なぜか new StreamDataProvider() から返ってこなくなる。MemoryStream にコピーすると正常に動作する。なぜ？
+                stream.CopyTo(memory_stream);
+
+                var result = TagLibSharp2.Core.MediaFile.ReadFromData(memory_stream.ToArray());
+
+                if (result.IsSuccess && result.Tag is not null)
                 {
-                    Info.Title = s;
+                    if (result.Tag.Title is string s)
+                    {
+                        Info.Title = s;
+                    }
+                    if (result.Tag.Track is uint t)
+                    {
+                        Info.No = t;
+                    }
                 }
-                if (result.Tag.Track is uint t)
+
+                var engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
+                var audio_format = SoundFlow.Structs.AudioFormat.Cd;
+
+                p = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, memory_stream);
+
+                if (p.FormatInfo is not null)
                 {
-                    Info.No = t;
+                    Info.Length = p.FormatInfo.Duration;
                 }
-            }
-
-
-            var engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
-            var audio_format = SoundFlow.Structs.AudioFormat.Cd;
-
-            SoundFlow.Providers.StreamDataProvider p = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, memory_stream);
-
-            if (p.FormatInfo is not null)
+            } catch (Exception e)
             {
-                Info.Length = p.FormatInfo.Duration;
-            } else
-            {
-                throw new TrackDataLoadException();
+                System.Diagnostics.Debug.WriteLine($"Track.LoadMetadata() failed: [{e.GetType().Name}] {e.Message}");
             }
+            finally
+            {
+                stream?.Close();
+                stream = null;
 
-            p.Dispose();
-            memory_stream.Close();
+                p?.Dispose();
+                p = null;
+
+                memory_stream?.Close();
+                memory_stream = null;
+            }
         }
     }
 }
