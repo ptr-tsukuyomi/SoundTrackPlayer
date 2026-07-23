@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Maui.Storage;
 using System.Diagnostics;
+using System.Text;
 
 namespace SoundTrackPlayer.ViewModel
 {
@@ -119,7 +120,7 @@ namespace SoundTrackPlayer.ViewModel
             });
         }
 
-        private void RefreshTrackView()
+        public void RefreshTrackView()
         {
             OnPropertyChanged(nameof(TrackDefaultLoopModeItem));
             OnPropertyChanged(nameof(TrackLoopBeginString));
@@ -531,9 +532,14 @@ namespace SoundTrackPlayer.ViewModel
                 try
                 {
                     _play_list.Source.SavePlayList(_play_list);
+
+                    foreach (var e in _tracks!)
+                    {
+                        e.TrackConfigSaveCommand.Execute(null);
+                    }
                 } catch (Exception e)
                 {
-                    await Application.Current!.Windows[0]!.Page!.DisplayAlertAsync("",$"プレイリストの保存に失敗しました。\r\n\r\n[例外]\r\n{e.GetType().Name}\r\n\r\n[メッセージ]\r\n{e.Message}","OK");
+                    await Application.Current!.Windows[0]!.Page!.DisplayAlertAsync("", $"プレイリストの保存に失敗しました。\r\n\r\n[例外]\r\n{e.GetType().Name}\r\n\r\n[メッセージ]\r\n{e.Message}", "OK");
                 }
             });
 
@@ -544,7 +550,7 @@ namespace SoundTrackPlayer.ViewModel
 
                 StaticResource.PlayLists.Remove(_play_list);
 
-                if (result == "ファイルも削除"&& _play_list.Source != null)
+                if (result == "ファイルも削除" && _play_list.Source != null)
                 {
                     try
                     {
@@ -557,7 +563,62 @@ namespace SoundTrackPlayer.ViewModel
                     }
                 }
             });
+
+            TrackConfigSaveCommand = new Command(async () =>
+            {
+                var csv = Misc.GenerateTrackConfigCsv(_play_list.Tracks);
+
+                var filesave_result = await FileSaver.SaveAsync($"{_play_list.Name}.csv", new MemoryStream(0));
+                if (!filesave_result.IsSuccessful) return;
+
+                try
+                {
+                    using (var writer = new StreamWriter(filesave_result.FilePath, false, new UTF8Encoding(false)))
+                    {
+                        writer.Write(csv);
+                    }
+                }
+                catch (Exception e)
+                {
+                    await Application.Current!.Windows[0]!.Page!.DisplayAlertAsync("", $"トラック設定一覧の保存に失敗しました。\r\n\r\n[例外]\r\n{e.GetType().Name}\r\n\r\n[メッセージ]\r\n{e.Message}", "OK");
+                }
+            });
+
+            TrackConfigLoadCommand = new Command(async () =>
+            {
+                var r1 = await FilePicker.Default.PickAsync();
+                if (r1 is null) return;
+
+                try
+                {
+                    var csv = await File.ReadAllTextAsync(r1.FullPath, new UTF8Encoding(false));
+                    var track_configs = Misc.CreateTrackConfigFromCsv(csv).ToList();
+
+                    if (_play_list.Tracks.Count != track_configs.Count)
+                    {
+                        var r2 = await Application.Current!.Windows[0]!.Page!.DisplayActionSheetAsync("設定反映対象のトラック数と読み込んだトラック設定の数が一致しません。上から可能な限り設定を反映しますか？", "キャンセル", null, ["はい", "いいえ"]);
+                        if (r2 != "はい") return;
+                    }
+
+                    var num_of_tracks_to_apply = Math.Min(_play_list.Tracks.Count, track_configs.Count);
+                    for (int i = 0;i < num_of_tracks_to_apply; ++i)
+                    {
+                        var track = _play_list.Tracks[i];
+                        var config = track_configs[i];
+                        track.Config.LoopBegin = config.LoopBegin;
+                        track.Config.LoopEnd = config.LoopEnd;
+                        track.Config.DefaultLoopMode = config.DefaultLoopMode;
+                        track.Config.LoopCount = config.LoopCount;
+                        _tracks![i].RefreshTrackView();
+                    }
+                }
+                catch (Exception e)
+                {
+                    await Application.Current!.Windows[0]!.Page!.DisplayAlertAsync("", $"トラック設定一覧の読み込みに失敗しました。\r\n\r\n[例外]\r\n{e.GetType().Name}\r\n\r\n[メッセージ]\r\n{e.Message}", "OK");
+                }
+            });
         }
+
 
         private void PlayList_Changed(object? sender, PropertyChangedEventArgs e)
         {
@@ -749,5 +810,9 @@ namespace SoundTrackPlayer.ViewModel
         public Command PlayListSaveCommand { get; set; }
 
         public Command PlayListDeleteCommand { get; set; }
+
+        public Command TrackConfigLoadCommand { get; set; }
+
+        public Command TrackConfigSaveCommand { get; set; }
     }
 }

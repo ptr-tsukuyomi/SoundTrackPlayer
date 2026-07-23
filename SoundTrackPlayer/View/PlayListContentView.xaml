@@ -37,6 +37,8 @@
                     <ImageButton Source="{AppThemeBinding Light=circle_backslash_light.png, Dark=circle_backslash_dark.png}" Command="{Binding Path=ClearCommand}" VerticalOptions="Center" Margin="5"/>
                     <!--<Button Text="ループ開始位置検出" Command="{Binding Path=FindLoopBeginCommand}" VerticalOptions="Center" Margin="5" />-->
                     <ImageButton Source="{AppThemeBinding Light=crosshair_2_light.png, Dark=crosshair_2_dark.png}" Command="{Binding Path=FindLoopBeginCommand}" VerticalOptions="Center" Margin="5"/>
+                    <ImageButton Source="{AppThemeBinding Light=file_text_light.png, Dark=file_text_dark.png}" Command="{Binding Path=TrackConfigLoadCommand}" VerticalOptions="Center" Margin="5"/>
+                    <ImageButton Source="{AppThemeBinding Light=share_2_light.png, Dark=share_2_dark.png}" Command="{Binding Path=TrackConfigSaveCommand}" VerticalOptions="Center" Margin="5"/>
                     <ImageButton Source="{AppThemeBinding Light=trash_light.png, Dark=trash_dark.png}" Command="{Binding Path=PlayListDeleteCommand}" VerticalOptions="Center" Margin="5"/>
                     <ImageButton Source="{AppThemeBinding Light=save_light.png,Dark=save_dark.png}" Command="{Binding Path=PlayListSaveCommand}" VerticalOptions="Center" Margin="5" />
                 </HorizontalStackLayout>
