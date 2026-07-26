@@ -48,13 +48,31 @@ namespace SoundTrackPlayer.Model
             public uint? LoopCount { get; set; }
         }
 
+        public sealed class TrackConfigRecordMap : CsvHelper.Configuration.ClassMap<TrackConfigRecord>
+        {
+            public TrackConfigRecordMap()
+            {
+                Map(m => m.TrackTitle).Index(0).Default("");
+                Map(m => m.LoopBegin).Index(1);
+                Map(m => m.LoopEnd).Index(2);
+                Map(m => m.DefaultLoopMode).Index(3).Default(LoopMode.None);
+                Map(m => m.LoopCount).Index(4).Default((uint?)null);
+            }
+        }
+
         public static string GenerateTrackConfigCsv(IEnumerable<Track> tracks)
         {
             var records = tracks.Select((e) => TrackConfigRecord.Create(e.Config, e.Info.Title)).ToList();
 
-            using (var writer = new StringWriter())
-            using (var cw = new CsvHelper.CsvWriter(writer, CultureInfo.InvariantCulture))
+            var cfg = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
             {
+                HasHeaderRecord = false
+            };
+
+            using (var writer = new StringWriter())
+            using (var cw = new CsvHelper.CsvWriter(writer, cfg))
+            {
+                cw.Context.RegisterClassMap<TrackConfigRecordMap>();
                 cw.WriteRecords(records);
                 return writer.ToString();
             }
@@ -64,12 +82,14 @@ namespace SoundTrackPlayer.Model
         {
             var cfg = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                HasHeaderRecord = true
+                HasHeaderRecord = false,
+                MissingFieldFound = null
             };
 
             using (var reader = new StringReader(csv))
             using (var cr = new CsvHelper.CsvReader(reader, cfg))
             {
+                cr.Context.RegisterClassMap<TrackConfigRecordMap>();
                 var records = cr.GetRecords<TrackConfigRecord>();
 
                 return records.Select((e) => new TrackConfig()
