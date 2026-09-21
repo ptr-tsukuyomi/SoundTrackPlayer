@@ -195,6 +195,7 @@ namespace SoundTrackPlayer.ViewModel
             OnPropertyChanged(nameof(CurrentLoopEndString));
             OnPropertyChanged(nameof(LastLoopExecutionString));
             OnPropertyChanged(nameof(VolumeButtonImageSource));
+            OnPropertyChanged(nameof(AlbumImageSource));
         }
 
         private async void Player_PlayerStateChanged(object? sender, PlayerState e)
@@ -468,6 +469,24 @@ namespace SoundTrackPlayer.ViewModel
                     true => ImageSource.FromFile($"speaker_off_{theme}.png"),
                     false => ImageSource.FromFile($"speaker_loud_{theme}.png")
                 };
+            }
+        }
+
+        public ImageSource AlbumImageSource
+        {
+            get
+            {
+                if (Track is null) return "";
+
+                if (Track?.Info.AlbumImage?.Source is not null)
+                {
+                    return Track.Info.AlbumImage.Source;
+                }
+
+                if (Application.Current is null) throw new Exception();
+                string theme = Application.Current.RequestedTheme == AppTheme.Dark ? "dark" : "light";
+
+                return ImageSource.FromFile($"music_{theme}.png");
             }
         }
 

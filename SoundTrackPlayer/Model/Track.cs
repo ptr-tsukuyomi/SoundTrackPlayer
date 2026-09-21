@@ -34,6 +34,21 @@ namespace SoundTrackPlayer.Model
         public partial uint? LoopCount { get; set; }
     }
 
+    public partial class AlbumImage : ObservableObject
+    {
+        public AlbumImage(string filepath)
+        {
+            Source = FileImageSource.FromFile(filepath);
+            FilePath = filepath;
+        }
+
+        [ObservableProperty]
+        public partial ImageSource Source { get; set; }
+
+        [ObservableProperty]
+        public partial string FilePath { get; set; }
+    }
+
     public partial class TrackInfo : ObservableObject
     {
         public TrackInfo() {}
@@ -44,6 +59,8 @@ namespace SoundTrackPlayer.Model
         public partial string? Title { get; set; } = null;
         [ObservableProperty]
         public partial TimeSpan? Length { get; set; } = null;
+        [ObservableProperty]
+        public partial AlbumImage? AlbumImage { get; set; } = null;
     }
 
     public partial class Track : ObservableObject

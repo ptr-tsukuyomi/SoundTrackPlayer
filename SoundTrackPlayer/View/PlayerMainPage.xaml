@@ -116,19 +116,21 @@
                             </VerticalStackLayout>
                         </toolkit:Expander>
 
-                        <Grid Margin="5" >
+                        <Grid Margin="5,0,5,5" >
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Label Margin="5" Text="{Binding Path=Track.Info.Title, FallbackValue='トラックなし'}" Grid.Column="0" VerticalOptions="Center"  />
-                            <HorizontalStackLayout Grid.Column="1" VerticalOptions="Center">
+                            <Image Grid.Column="0" Source="{Binding AlbumImageSource}" WidthRequest="70" HeightRequest="70" Margin="0,0,0,0" />
+                            <Label Margin="10,5,5,5" Text="{Binding Path=Track.Info.Title, FallbackValue='トラックなし'}" FontSize="Small" Grid.Column="1" VerticalOptions="Center" />
+                            <HorizontalStackLayout Grid.Column="2" VerticalOptions="Center">
                                 <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Source="{AppThemeBinding Light=track_previous_light.png,Dark=track_previous_dark.png}" Command="{Binding Path=PreviousButtonClickCommand}" />
                                 <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Source="{Binding Path=PlayPauseButtonImageSource}" Command="{Binding Path=PlayPauseButtonClickCommand}" />
                                 <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Source="{AppThemeBinding Light=track_next_light.png,Dark=track_next_dark.png}" Command="{Binding Path=NextButtonClickCommand}" />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout FlowDirection="RightToLeft" Grid.Column="2" VerticalOptions="Center" >
+                            <HorizontalStackLayout FlowDirection="RightToLeft" Grid.Column="3" VerticalOptions="Center" >
                                 <HorizontalStackLayout FlowDirection="LeftToRight">
                                     <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Command="{Binding ShuffleModeButtonClickCommand}" Source="{Binding ShuffleModeButtonImageSource}" VerticalOptions="Center" />
                                     <ImageButton Margin="5" WidthRequest="10" HeightRequest="10" Command="{Binding ContinuousPlayModeButtonClickCommand}" Source="{Binding ContinuousPlayModeButtonImageSource}" VerticalOptions="Center" />

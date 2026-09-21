@@ -1,6 +1,8 @@
 ﻿using Microsoft.UI.Xaml;
 using SoundTrackPlayer.Model;
 using Windows.Media;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -33,7 +35,6 @@ namespace SoundTrackPlayer.WinUI
             _smtc = Windows.Media.SystemMediaTransportControlsInterop.GetForWindow(hWnd);
             _smtc.IsEnabled = true;
             _smtc.IsStopEnabled = true;
-            _smtc.DisplayUpdater.Type = MediaPlaybackType.Music;
             _smtc.ButtonPressed += _smtc_ButtonPressed;
             UpdateSMTC();
 
@@ -57,7 +58,7 @@ namespace SoundTrackPlayer.WinUI
             UpdateSMTC();
         }
 
-        private static void UpdateSMTC()
+        private static async void UpdateSMTC()
         {
             if (_smtc is null) throw new Exception();
 
@@ -73,7 +74,16 @@ namespace SoundTrackPlayer.WinUI
                 PlayerState.Stopped => MediaPlaybackStatus.Stopped,
                 _ => throw new NotImplementedException(),
             };
+
+            _smtc.DisplayUpdater.ClearAll();
+            _smtc.DisplayUpdater.Type = MediaPlaybackType.Music;
             _smtc.DisplayUpdater.MusicProperties.Title = StaticResource.Player.Queue.CurrentTrack?.Info.Title ?? "";
+            var filepath = StaticResource.Player.Queue.CurrentTrack?.Info.AlbumImage?.FilePath;
+            if (filepath is not null)
+            {
+                var file = StorageFile.GetFileFromPathAsync(filepath);
+                _smtc.DisplayUpdater.Thumbnail = RandomAccessStreamReference.CreateFromFile(await file);
+            }
             _smtc.DisplayUpdater.Update();
         }
 
