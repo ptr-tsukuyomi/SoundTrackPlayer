@@ -24,7 +24,8 @@
 
 	- ループ区間の終了位置が指定されていれば、ループ区間開始位置の検出を試みることが可能です。
 	- 非常に単純なアルゴリズムで実装しているため、CPU が非力だと時間がかかります。 また、誤った位置が検出されてしまうことがあります。あくまで補助としてご使用ください。
-		- ループ区間の検出を専門とするアプリケーションがあるようです(例:  [AutoLooper](https://github.com/YoshimiKudo/AutoLooper))。
+		- ループ区間の検出を専門とするアプリケーションがあるようです(例:  [AutoLooper](https://github.com/YoshimiKudo/AutoLooper), [GamingLooper](https://github.com/YoshimiKudo/GamingLooper))。
+		- [GamingLooper の Sequence ファイルを m3u 形式のプレイリストとサイドカーファイルに変換するスクリプト](documents/convert-glseq-to-m3u-with-sidecar.md)を作成しました。
 
 ## 対応 OS
 - Windows 11
