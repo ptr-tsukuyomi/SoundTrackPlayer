@@ -137,26 +137,47 @@ namespace SoundTrackPlayer.Model
 
                 var result = TagLibSharp2.Core.MediaFile.ReadFromData(memory_stream.ToArray());
 
-                if (result.IsSuccess && result.Tag is not null)
+                if (result.IsSuccess)
                 {
-                    if (result.Tag.Title is string s)
+                    Info.Length = result.File switch
                     {
-                        Info.Title = s;
+                        TagLibSharp2.Xiph.FlacFile flac => flac.Properties.Duration,
+                        TagLibSharp2.Riff.WavFile wav => wav.Properties.Duration,
+                        TagLibSharp2.Mpeg.Mp3File mp3 => mp3.Duration,
+                        TagLibSharp2.Ogg.OggVorbisFile vorbis => vorbis.Properties.Duration,
+                        _ => null
+                    };
+
+                    if (result.Tag is not null)
+                    {
+                        if (result.Tag.Title is string s)
+                        {
+                            Info.Title = s;
+                        }
+                        if (result.Tag.Track is uint t)
+                        {
+                            Info.No = t;
+                        }
                     }
-                    if (result.Tag.Track is uint t)
+
+                    if (result.File is TagLibSharp2.Riff.WavFile w)
                     {
-                        Info.No = t;
+                        w.Dispose();
+                        GC.Collect(); // TagLibSharp2 で RIFF チャンクを抱え込んでしまうようなので対策
                     }
                 }
 
-                var engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
-                var audio_format = SoundFlow.Structs.AudioFormat.Cd;
-
-                p = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, memory_stream);
-
-                if (p.FormatInfo is not null)
+                if (Info.Length is null)
                 {
-                    Info.Length = p.FormatInfo.Duration;
+                    var engine = new SoundFlow.Backends.MiniAudio.MiniAudioEngine();
+                    var audio_format = SoundFlow.Structs.AudioFormat.Cd;
+
+                    p = new SoundFlow.Providers.StreamDataProvider(engine, audio_format, memory_stream);
+
+                    if (p.FormatInfo is not null)
+                    {
+                        Info.Length = p.FormatInfo.Duration;
+                    }
                 }
             } catch (Exception e)
             {
